@@ -4,7 +4,15 @@ import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import AdminWallpaperItem from "@/components/AdminWallpaperItem";
+
 export default async function AdminDashboard() {
+    const session = await auth();
+    if (!session) {
+        redirect("/login");
+    }
     const wallpapers = await prisma.wallpaper.findMany({
         orderBy: { releaseDate: "desc" },
     });
@@ -20,23 +28,9 @@ export default async function AdminDashboard() {
                     Upload New Wallpaper
                 </Link>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {wallpapers.map((wallpaper) => (
-                    <div key={wallpaper.id} className="border rounded p-4 shadow bg-white text-black">
-                        <img
-                            src={wallpaper.url}
-                            alt={wallpaper.description || "Wallpaper"}
-                            className="w-full h-48 object-cover rounded mb-4"
-                        />
-                        <p className="font-bold">{format(wallpaper.releaseDate, "yyyy-MM-dd")}</p>
-                        <p className="text-gray-600 mb-4">{wallpaper.description}</p>
-                        <div className="flex gap-2">
-                            {/* TODO: Implement Edit/Delete functionality */}
-                            <button className="text-blue-500 hover:underline">Edit</button>
-                            <button className="text-red-500 hover:underline">Delete</button>
-                        </div>
-                    </div>
+                    <AdminWallpaperItem key={wallpaper.id} wallpaper={wallpaper} />
                 ))}
             </div>
         </div>
