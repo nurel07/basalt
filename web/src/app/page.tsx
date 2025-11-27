@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
+import MasonryGrid from "@/components/MasonryGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -19,16 +20,16 @@ export default async function Home() {
     <div className="min-h-screen p-8">
       <h1 className="text-4xl font-bold text-center mb-12">Wallpapers</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <MasonryGrid>
         {wallpapers.map((wallpaper) => (
           <div
             key={wallpaper.id}
-            className="group relative aspect-[16/10] overflow-hidden rounded-xl shadow-lg cursor-pointer"
+            className="group relative overflow-hidden rounded-xl shadow-lg cursor-pointer break-inside-avoid"
           >
             <img
               src={wallpaper.url}
               alt={wallpaper.description || "Wallpaper"}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
             />
 
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
@@ -41,7 +42,7 @@ export default async function Home() {
             </div>
           </div>
         ))}
-      </div>
+      </MasonryGrid>
     </div>
   );
 }
