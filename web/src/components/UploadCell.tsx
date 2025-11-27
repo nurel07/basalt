@@ -8,8 +8,10 @@ import UploadModal from "./UploadModal";
 export default function UploadCell() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleUploadComplete = (res: any) => {
+        setIsUploading(false);
         if (res && res[0]) {
             setUploadedImageUrl(res[0].url);
             setIsModalOpen(true);
@@ -26,6 +28,7 @@ export default function UploadCell() {
                         endpoint="imageUploader"
                         onUploadBegin={() => {
                             console.log("Upload started...");
+                            setIsUploading(true);
                         }}
                         onClientUploadComplete={(res) => {
                             console.log("Upload completed:", res);
@@ -33,6 +36,7 @@ export default function UploadCell() {
                         }}
                         onUploadError={(error: Error) => {
                             console.error("Upload error:", error);
+                            setIsUploading(false);
                             alert(`ERROR! ${error.message}`);
                         }}
                         appearance={{
@@ -47,8 +51,12 @@ export default function UploadCell() {
 
                 {/* Visual Content */}
                 <div className="flex flex-col items-center text-gray-400 group-hover:text-blue-500 transition-colors pointer-events-none z-10">
-                    <Upload className="w-12 h-12 mb-2" />
-                    <span className="font-medium">Upload Image</span>
+                    {isUploading ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                    ) : (
+                        <Upload className="w-12 h-12 mb-2" />
+                    )}
+                    <span className="font-medium">{isUploading ? "Uploading..." : "Upload Image"}</span>
                 </div>
             </div>
 
