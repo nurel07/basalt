@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
                 </div>
             </div>
 
-            <MasonryGrid>
+            <MasonryGrid gap="gap-0 space-y-0">
                 {/* First cell is always the Upload trigger */}
                 <UploadCell />
 

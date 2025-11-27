@@ -29,24 +29,34 @@ export default function AdminWallpaperItem({ wallpaper }: { wallpaper: Wallpaper
     };
 
     return (
-        <div className="border rounded p-4 shadow bg-white text-black">
+        <div className="group relative">
             <img
                 src={wallpaper.url}
                 alt={wallpaper.description || "Wallpaper"}
-                className="w-full h-48 object-cover rounded mb-4"
+                className="w-full h-auto object-cover block"
             />
-            <p className="font-bold">{format(new Date(wallpaper.releaseDate), "yyyy-MM-dd")}</p>
-            <p className="text-gray-600 mb-4">{wallpaper.description}</p>
-            <div className="flex gap-2">
-                <Link
-                    href={`/admin/wallpapers/${wallpaper.id}/edit`}
-                    className="text-blue-500 hover:underline"
-                >
-                    Edit
-                </Link>
-                <button onClick={handleDelete} className="text-red-500 hover:underline">
-                    Delete
-                </button>
+
+            {/* Overlay with buttons, visible only on hover */}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-4">
+                <div className="flex justify-end gap-2">
+                    <Link
+                        href={`/admin/wallpapers/${wallpaper.id}/edit`}
+                        className="bg-white/90 text-black px-3 py-1 rounded text-sm font-medium hover:bg-white"
+                    >
+                        Edit
+                    </Link>
+                    <button
+                        onClick={handleDelete}
+                        className="bg-red-500/90 text-white px-3 py-1 rounded text-sm font-medium hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
+                </div>
+
+                <div className="text-white">
+                    <p className="font-bold text-sm">{format(new Date(wallpaper.releaseDate), "yyyy-MM-dd")}</p>
+                    {wallpaper.description && <p className="text-xs opacity-90 truncate">{wallpaper.description}</p>}
+                </div>
             </div>
         </div>
     );

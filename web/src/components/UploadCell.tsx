@@ -18,10 +18,10 @@ export default function UploadCell() {
 
     return (
         <>
-            <div className="relative aspect-[16/10] rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-colors bg-gray-50 dark:bg-gray-800/50 flex flex-col items-center justify-center overflow-hidden group">
+            <div className="relative w-full h-auto aspect-[16/10] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center overflow-hidden group cursor-pointer">
 
                 {/* We overlay the UploadDropzone to cover the entire area */}
-                <div className="absolute inset-0 z-10 opacity-0 cursor-pointer">
+                <div className="absolute inset-0 z-20 opacity-0">
                     <UploadDropzone
                         endpoint="imageUploader"
                         onClientUploadComplete={handleUploadComplete}
@@ -39,10 +39,9 @@ export default function UploadCell() {
                 </div>
 
                 {/* Visual Content */}
-                <div className="flex flex-col items-center text-gray-400 group-hover:text-blue-500 transition-colors pointer-events-none">
+                <div className="flex flex-col items-center text-gray-400 group-hover:text-blue-500 transition-colors pointer-events-none z-10">
                     <Upload className="w-12 h-12 mb-2" />
                     <span className="font-medium">Upload Image</span>
-                    <span className="text-xs mt-1 opacity-70">Drag & drop or click</span>
                 </div>
             </div>
 
