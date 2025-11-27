@@ -1,4 +1,6 @@
-generateUploadButton,
+```
+import {
+    generateUploadButton,
     generateUploadDropzone,
     generateReactHelpers,
 } from "@uploadthing/react";
