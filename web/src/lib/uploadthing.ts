@@ -1,4 +1,3 @@
-```
 import {
     generateUploadButton,
     generateUploadDropzone,

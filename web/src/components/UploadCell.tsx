@@ -1,4 +1,3 @@
-```typescript
 "use client";
 
 import { useUploadThing } from "@/lib/uploadthing";
@@ -24,7 +23,7 @@ export default function UploadCell() {
         onUploadError: (error: Error) => {
             console.error("Upload error:", error);
             setIsUploading(false);
-            alert(`ERROR! ${ error.message } `);
+            alert(`ERROR! ${error.message} `);
         },
         onUploadBegin: () => {
             console.log("Upload started...");
@@ -41,14 +40,14 @@ export default function UploadCell() {
 
     return (
         <>
-            <div 
+            <div
                 className="relative w-full h-auto aspect-[16/10] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center overflow-hidden group cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
             >
-                
+
                 {/* Hidden File Input */}
-                <input 
-                    type="file" 
+                <input
+                    type="file"
                     ref={fileInputRef}
                     className="hidden"
                     accept="image/*"
