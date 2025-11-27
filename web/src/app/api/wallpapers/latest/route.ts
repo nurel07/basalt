@@ -8,9 +8,10 @@ export async function GET() {
                 lte: new Date(),
             },
         },
-        orderBy: {
-            releaseDate: "desc",
-        },
+        orderBy: [
+            { releaseDate: "desc" },
+            { createdAt: "desc" },
+        ],
     });
 
     if (!wallpaper) {
