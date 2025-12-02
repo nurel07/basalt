@@ -2,13 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-    const wallpapers = await prisma.wallpaper.findMany({
-        orderBy: [
-            { releaseDate: "desc" },
-            { createdAt: "desc" },
-        ],
-    });
-    return NextResponse.json(wallpapers);
+    try {
+        const wallpapers = await prisma.wallpaper.findMany({
+            orderBy: [
+                { releaseDate: "desc" },
+                { createdAt: "desc" },
+            ],
+        });
+        return NextResponse.json(wallpapers);
+    } catch (error) {
+        console.error("Error fetching wallpapers:", error);
+        return NextResponse.json({ error: "Error fetching wallpapers" }, { status: 500 });
+    }
 }
 
 export async function POST(request: Request) {
