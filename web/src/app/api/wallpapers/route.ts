@@ -5,6 +5,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const channelParam = searchParams.get("channel");
 
+    console.log("API v4 CALL RECEIVED", request.url);
+
     try {
         let where = {};
         if (channelParam) {
@@ -34,7 +36,7 @@ export async function GET(request: Request) {
         // Debug: Return X-Debug-Version header to verify deployment
         return NextResponse.json(wallpapers, {
             headers: {
-                "X-Debug-Version": "v3",
+                "X-Debug-Version": "v4",
             },
         });
     } catch (error) {
