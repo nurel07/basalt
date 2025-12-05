@@ -30,11 +30,18 @@ export async function GET(request: Request) {
                 { createdAt: "desc" },
             ],
         });
-        return NextResponse.json(wallpapers);
-    } catch (error) {
-        console.error("Error fetching wallpapers:", error);
-        return NextResponse.json({ error: "Error fetching wallpapers" }, { status: 500 });
-    }
+    });
+
+    // Debug: Return X-Debug-Version header to verify deployment
+    return NextResponse.json(wallpapers, {
+        headers: {
+            "X-Debug-Version": "v2",
+        },
+    });
+} catch (error) {
+    console.error("Error fetching wallpapers:", error);
+    return NextResponse.json({ error: "Error fetching wallpapers" }, { status: 500 });
+}
 }
 
 export async function POST(request: Request) {
