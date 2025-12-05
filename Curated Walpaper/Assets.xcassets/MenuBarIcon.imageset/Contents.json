@@ -1,0 +1,23 @@
+{
+    "images": [
+        {
+            "size": "18x18",
+            "idiom": "mac",
+            "filename": "icon_18x18.png",
+            "scale": "1x"
+        },
+        {
+            "size": "18x18",
+            "idiom": "mac",
+            "filename": "icon_18x18@2x.png",
+            "scale": "2x"
+        }
+    ],
+    "info": {
+        "version": 1,
+        "author": "xcode"
+    },
+    "properties": {
+        "template-rendering-intent": "template"
+    }
+}
