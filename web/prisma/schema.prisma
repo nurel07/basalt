@@ -16,6 +16,7 @@ model Wallpaper {
   url         String
   description String?
   externalUrl String?
+  channel     String   @default("HUMAN") // "HUMAN" or "AI"
   releaseDate DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

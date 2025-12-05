@@ -14,6 +14,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [externalUrl, setExternalUrl] = useState("");
+    const [channel, setChannel] = useState("HUMAN");
     const [date, setDate] = useState("");
 
     const [isUploading, setIsUploading] = useState(false);
@@ -28,6 +29,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
             setName("");
             setDescription("");
             setExternalUrl("");
+            setChannel("HUMAN");
             setDate(new Date().toISOString().split('T')[0]);
             setUploadedUrl("");
 
@@ -90,6 +92,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
                     name,
                     description,
                     externalUrl,
+                    channel,
                     releaseDate: date,
                 }),
             });
@@ -167,6 +170,34 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
                                 className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                 placeholder="https://..."
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Channel</label>
+                            <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="channel"
+                                        value="HUMAN"
+                                        checked={channel === "HUMAN"}
+                                        onChange={(e) => setChannel(e.target.value)}
+                                        className="w-4 h-4 text-blue-600"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">Human</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="channel"
+                                        value="AI"
+                                        checked={channel === "AI"}
+                                        onChange={(e) => setChannel(e.target.value)}
+                                        className="w-4 h-4 text-blue-600"
+                                    />
+                                    <span className="text-gray-700 dark:text-gray-300">AI</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div>
