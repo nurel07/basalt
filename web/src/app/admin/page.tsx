@@ -18,7 +18,7 @@ export default async function AdminDashboard() {
         redirect("/login");
     }
     const wallpapers = await prisma.wallpaper.findMany({
-        orderBy: { releaseDate: "desc" },
+        orderBy: { releaseDate: "asc" },
     });
 
     return (

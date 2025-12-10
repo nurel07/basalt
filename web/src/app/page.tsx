@@ -12,7 +12,7 @@ export default async function Home() {
       },
     },
     orderBy: {
-      releaseDate: "desc",
+      releaseDate: "asc",
     },
   });
 
