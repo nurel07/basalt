@@ -43,12 +43,13 @@ export default function AdminDashboardTabs({
         <div>
             {/* Tabs Header */}
             {/* Header: Tabs + Filters */}
-            <div className="flex flex-col md:flex-row gap-4 items-center md:items-start border-b border-gray-200 mb-6 pb-4">
+            {/* Header: Tabs + Filters */}
+            <div className="flex flex-row items-center gap-6 border-b border-gray-200 mb-6 pb-4 overflow-x-auto">
                 {/* Future/Past Toggle */}
-                <div className="flex bg-gray-100 rounded-lg p-1 text-xs font-medium">
+                <div className="flex bg-gray-100 rounded-lg p-1.5 text-sm font-medium shrink-0">
                     <button
                         onClick={() => setActiveTab("future")}
-                        className={`px-4 py-1.5 rounded-md transition-all ${activeTab === "future"
+                        className={`px-5 py-2 rounded-md transition-all ${activeTab === "future"
                             ? "bg-white text-black shadow-sm"
                             : "text-gray-500 hover:text-gray-700"
                             }`}
@@ -57,7 +58,7 @@ export default function AdminDashboardTabs({
                     </button>
                     <button
                         onClick={() => setActiveTab("past")}
-                        className={`px-4 py-1.5 rounded-md transition-all ${activeTab === "past"
+                        className={`px-5 py-2 rounded-md transition-all ${activeTab === "past"
                             ? "bg-white text-black shadow-sm"
                             : "text-gray-500 hover:text-gray-700"
                             }`}
@@ -67,17 +68,21 @@ export default function AdminDashboardTabs({
                 </div>
 
                 {/* Channel Filter Toggle */}
-                <div className="flex bg-gray-100 rounded-lg p-1 text-xs font-medium">
-                    {(["ALL", "HUMAN", "AI"] as const).map((filter) => (
+                <div className="flex bg-gray-100 rounded-lg p-1.5 text-sm font-medium shrink-0">
+                    {[
+                        { id: "ALL", label: "All" },
+                        { id: "HUMAN", label: "Human" },
+                        { id: "AI", label: "AI" }
+                    ].map((filter) => (
                         <button
-                            key={filter}
-                            onClick={() => setChannelFilter(filter)}
-                            className={`px-4 py-1.5 rounded-md transition-all ${channelFilter === filter
+                            key={filter.id}
+                            onClick={() => setChannelFilter(filter.id as "ALL" | "HUMAN" | "AI")}
+                            className={`px-5 py-2 rounded-md transition-all ${channelFilter === filter.id
                                 ? "bg-white text-black shadow-sm"
                                 : "text-gray-500 hover:text-gray-700"
                                 }`}
                         >
-                            {filter}
+                            {filter.label}
                         </button>
                     ))}
                 </div>
