@@ -6,43 +6,47 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		530948BE2EF293CE00FAAB83 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 530948BD2EF293CE00FAAB83 /* Sparkle */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		537DD2252ED228500017D58D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 537DD20F2ED2284E0017D58D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 537DD2162ED2284E0017D58D;
-			remoteInfo = "Curated Walpaper";
+			remoteInfo = Basalt;
 		};
 		537DD22F2ED228500017D58D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 537DD20F2ED2284E0017D58D /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 537DD2162ED2284E0017D58D;
-			remoteInfo = "Curated Walpaper";
+			remoteInfo = Basalt;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		537DD2172ED2284E0017D58D /* Curated Walpaper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Curated Walpaper.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		537DD2242ED228500017D58D /* Curated WalpaperTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Curated WalpaperTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		537DD22E2ED228500017D58D /* Curated WalpaperUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Curated WalpaperUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		537DD2172ED2284E0017D58D /* Basalt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Basalt.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		537DD2242ED228500017D58D /* BasaltTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasaltTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		537DD22E2ED228500017D58D /* BasaltUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasaltUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		537DD2192ED2284E0017D58D /* Curated Walpaper */ = {
+		537DD2192ED2284E0017D58D /* Basalt */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Curated Walpaper";
+			path = Basalt;
 			sourceTree = "<group>";
 		};
-		537DD2272ED228500017D58D /* Curated WalpaperTests */ = {
+		537DD2272ED228500017D58D /* BasaltTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Curated WalpaperTests";
+			path = BasaltTests;
 			sourceTree = "<group>";
 		};
-		537DD2312ED228500017D58D /* Curated WalpaperUITests */ = {
+		537DD2312ED228500017D58D /* BasaltUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Curated WalpaperUITests";
+			path = BasaltUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				530948BE2EF293CE00FAAB83 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,9 +80,9 @@
 		537DD20E2ED2284E0017D58D = {
 			isa = PBXGroup;
 			children = (
-				537DD2192ED2284E0017D58D /* Curated Walpaper */,
-				537DD2272ED228500017D58D /* Curated WalpaperTests */,
-				537DD2312ED228500017D58D /* Curated WalpaperUITests */,
+				537DD2192ED2284E0017D58D /* Basalt */,
+				537DD2272ED228500017D58D /* BasaltTests */,
+				537DD2312ED228500017D58D /* BasaltUITests */,
 				537DD2182ED2284E0017D58D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +90,9 @@
 		537DD2182ED2284E0017D58D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				537DD2172ED2284E0017D58D /* Curated Walpaper.app */,
-				537DD2242ED228500017D58D /* Curated WalpaperTests.xctest */,
-				537DD22E2ED228500017D58D /* Curated WalpaperUITests.xctest */,
+				537DD2172ED2284E0017D58D /* Basalt.app */,
+				537DD2242ED228500017D58D /* BasaltTests.xctest */,
+				537DD22E2ED228500017D58D /* BasaltUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +100,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		537DD2162ED2284E0017D58D /* Curated Walpaper */ = {
+		537DD2162ED2284E0017D58D /* Basalt */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 537DD2382ED228500017D58D /* Build configuration list for PBXNativeTarget "Curated Walpaper" */;
+			buildConfigurationList = 537DD2382ED228500017D58D /* Build configuration list for PBXNativeTarget "Basalt" */;
 			buildPhases = (
 				537DD2132ED2284E0017D58D /* Sources */,
 				537DD2142ED2284E0017D58D /* Frameworks */,
@@ -108,18 +113,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				537DD2192ED2284E0017D58D /* Curated Walpaper */,
+				537DD2192ED2284E0017D58D /* Basalt */,
 			);
 			name = Basalt;
 			packageProductDependencies = (
+				530948BD2EF293CE00FAAB83 /* Sparkle */,
 			);
 			productName = Basalt;
-			productReference = 537DD2172ED2284E0017D58D /* Curated Walpaper.app */;
+			productReference = 537DD2172ED2284E0017D58D /* Basalt.app */;
 			productType = "com.apple.product-type.application";
 		};
-		537DD2232ED228500017D58D /* Curated WalpaperTests */ = {
+		537DD2232ED228500017D58D /* BasaltTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 537DD23B2ED228500017D58D /* Build configuration list for PBXNativeTarget "Curated WalpaperTests" */;
+			buildConfigurationList = 537DD23B2ED228500017D58D /* Build configuration list for PBXNativeTarget "BasaltTests" */;
 			buildPhases = (
 				537DD2202ED228500017D58D /* Sources */,
 				537DD2212ED228500017D58D /* Frameworks */,
@@ -131,18 +137,18 @@
 				537DD2262ED228500017D58D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				537DD2272ED228500017D58D /* Curated WalpaperTests */,
+				537DD2272ED228500017D58D /* BasaltTests */,
 			);
-			name = "Curated WalpaperTests";
+			name = BasaltTests;
 			packageProductDependencies = (
 			);
-			productName = "Curated WalpaperTests";
-			productReference = 537DD2242ED228500017D58D /* Curated WalpaperTests.xctest */;
+			productName = BasaltTests;
+			productReference = 537DD2242ED228500017D58D /* BasaltTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		537DD22D2ED228500017D58D /* Curated WalpaperUITests */ = {
+		537DD22D2ED228500017D58D /* BasaltUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 537DD23E2ED228500017D58D /* Build configuration list for PBXNativeTarget "Curated WalpaperUITests" */;
+			buildConfigurationList = 537DD23E2ED228500017D58D /* Build configuration list for PBXNativeTarget "BasaltUITests" */;
 			buildPhases = (
 				537DD22A2ED228500017D58D /* Sources */,
 				537DD22B2ED228500017D58D /* Frameworks */,
@@ -154,13 +160,13 @@
 				537DD2302ED228500017D58D /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				537DD2312ED228500017D58D /* Curated WalpaperUITests */,
+				537DD2312ED228500017D58D /* BasaltUITests */,
 			);
-			name = "Curated WalpaperUITests";
+			name = BasaltUITests;
 			packageProductDependencies = (
 			);
-			productName = "Curated WalpaperUITests";
-			productReference = 537DD22E2ED228500017D58D /* Curated WalpaperUITests.xctest */;
+			productName = BasaltUITests;
+			productReference = 537DD22E2ED228500017D58D /* BasaltUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -171,7 +177,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2610;
-				LastUpgradeCheck = 2610;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					537DD2162ED2284E0017D58D = {
 						CreatedOnToolsVersion = 26.1.1;
@@ -186,7 +192,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 537DD2122ED2284E0017D58D /* Build configuration list for PBXProject "Curated Walpaper" */;
+			buildConfigurationList = 537DD2122ED2284E0017D58D /* Build configuration list for PBXProject "Basalt" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -195,14 +201,17 @@
 			);
 			mainGroup = 537DD20E2ED2284E0017D58D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				530948BC2EF293CE00FAAB83 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 537DD2182ED2284E0017D58D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				537DD2162ED2284E0017D58D /* Curated Walpaper */,
-				537DD2232ED228500017D58D /* Curated WalpaperTests */,
-				537DD22D2ED228500017D58D /* Curated WalpaperUITests */,
+				537DD2162ED2284E0017D58D /* Basalt */,
+				537DD2232ED228500017D58D /* BasaltTests */,
+				537DD22D2ED228500017D58D /* BasaltUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +267,12 @@
 /* Begin PBXTargetDependency section */
 		537DD2262ED228500017D58D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 537DD2162ED2284E0017D58D /* Curated Walpaper */;
+			target = 537DD2162ED2284E0017D58D /* Basalt */;
 			targetProxy = 537DD2252ED228500017D58D /* PBXContainerItemProxy */;
 		};
 		537DD2302ED228500017D58D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 537DD2162ED2284E0017D58D /* Curated Walpaper */;
+			target = 537DD2162ED2284E0017D58D /* Basalt */;
 			targetProxy = 537DD22F2ED228500017D58D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -303,6 +312,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -327,6 +337,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -366,6 +377,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -383,6 +395,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 			};
 			name = Release;
@@ -392,10 +405,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Basalt/Basalt.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TPTX92R8DB;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
@@ -409,6 +426,7 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -416,7 +434,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yevgen.glukhov.Curated-Walpaper";
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.Basalt;
 				PRODUCT_NAME = Basalt;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -433,9 +451,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Basalt/Basalt.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = TPTX92R8DB;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -450,6 +472,7 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -457,7 +480,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yevgen.glukhov.Curated-Walpaper";
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.Basalt;
 				PRODUCT_NAME = Basalt;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -475,17 +498,18 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yevgen.glukhov.Curated-WalpaperTests";
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Curated Walpaper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Curated Walpaper";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Basalt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Basalt";
 			};
 			name = Debug;
 		};
@@ -495,17 +519,18 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yevgen.glukhov.Curated-WalpaperTests";
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Curated Walpaper.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Curated Walpaper";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Basalt.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Basalt";
 			};
 			name = Release;
 		};
@@ -514,16 +539,17 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yevgen.glukhov.Curated-WalpaperUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = "Curated Walpaper";
+				TEST_TARGET_NAME = Basalt;
 			};
 			name = Debug;
 		};
@@ -532,23 +558,24 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yevgen.glukhov.Curated-WalpaperUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = "Curated Walpaper";
+				TEST_TARGET_NAME = Basalt;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		537DD2122ED2284E0017D58D /* Build configuration list for PBXProject "Curated Walpaper" */ = {
+		537DD2122ED2284E0017D58D /* Build configuration list for PBXProject "Basalt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				537DD2362ED228500017D58D /* Debug */,
@@ -557,7 +584,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		537DD2382ED228500017D58D /* Build configuration list for PBXNativeTarget "Curated Walpaper" */ = {
+		537DD2382ED228500017D58D /* Build configuration list for PBXNativeTarget "Basalt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				537DD2392ED228500017D58D /* Debug */,
@@ -566,7 +593,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		537DD23B2ED228500017D58D /* Build configuration list for PBXNativeTarget "Curated WalpaperTests" */ = {
+		537DD23B2ED228500017D58D /* Build configuration list for PBXNativeTarget "BasaltTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				537DD23C2ED228500017D58D /* Debug */,
@@ -575,7 +602,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		537DD23E2ED228500017D58D /* Build configuration list for PBXNativeTarget "Curated WalpaperUITests" */ = {
+		537DD23E2ED228500017D58D /* Build configuration list for PBXNativeTarget "BasaltUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				537DD23F2ED228500017D58D /* Debug */,
@@ -585,6 +612,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		530948BC2EF293CE00FAAB83 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		530948BD2EF293CE00FAAB83 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 530948BC2EF293CE00FAAB83 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 537DD20F2ED2284E0017D58D /* Project object */;
 }

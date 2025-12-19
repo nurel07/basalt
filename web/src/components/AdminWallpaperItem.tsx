@@ -3,17 +3,17 @@
 import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Wallpaper } from "./UploadModal";
+import { getOptimizedUrl } from "@/lib/cloudinary";
 
-interface Wallpaper {
-    id: string;
-    url: string;
-    name: string | null;
-    description: string | null;
-    externalUrl: string | null;
-    releaseDate: Date | string;
+
+
+interface AdminWallpaperItemProps {
+    wallpaper: Wallpaper;
+    onReschedule?: (wallpaper: Wallpaper) => void;
 }
 
-export default function AdminWallpaperItem({ wallpaper }: { wallpaper: Wallpaper }) {
+export default function AdminWallpaperItem({ wallpaper, onReschedule }: AdminWallpaperItemProps) {
     const router = useRouter();
 
     const handleDelete = async () => {
@@ -33,14 +33,23 @@ export default function AdminWallpaperItem({ wallpaper }: { wallpaper: Wallpaper
     return (
         <div className="group relative">
             <img
-                src={wallpaper.url}
+                src={getOptimizedUrl(wallpaper.url)}
                 alt={wallpaper.name || wallpaper.description || "Wallpaper"}
                 className="w-full h-auto object-cover block"
+                loading="lazy"
             />
 
             {/* Overlay with buttons, visible only on hover */}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-4">
                 <div className="flex justify-end gap-2">
+                    {onReschedule && (
+                        <button
+                            onClick={() => onReschedule(wallpaper)}
+                            className="bg-blue-500/90 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-600"
+                        >
+                            Reschedule
+                        </button>
+                    )}
                     <Link
                         href={`/admin/wallpapers/${wallpaper.id}/edit`}
                         className="bg-white/90 text-black px-3 py-1 rounded text-sm font-medium hover:bg-white"

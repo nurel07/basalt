@@ -3,14 +3,26 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+export interface Wallpaper {
+    id: string;
+    url: string;
+    name: string | null;
+    description: string | null;
+    externalUrl: string | null;
+    channel: string | null;
+    releaseDate: Date | string;
+}
+
 interface UploadModalProps {
     isOpen: boolean;
     onClose: () => void;
     file: File | null;
     previewUrl: string;
+    wallpaper?: Wallpaper;
+    mode?: "UPLOAD" | "RESCHEDULE";
 }
 
-export default function UploadModal({ isOpen, onClose, file, previewUrl }: UploadModalProps) {
+export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpaper, mode = "UPLOAD" }: UploadModalProps) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [externalUrl, setExternalUrl] = useState("");
@@ -23,19 +35,37 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
 
     const router = useRouter();
 
-    // Reset form and start upload when modal opens with a new file
+    // Reset form and start upload when modal opens
     useEffect(() => {
-        if (isOpen && file) {
+        if (!isOpen) return;
+
+        if (mode === "RESCHEDULE" && wallpaper) {
+            // Pre-fill for Rescheduling
+            setName(wallpaper.name || "");
+            setDescription(wallpaper.description || "");
+            setExternalUrl(wallpaper.externalUrl || "");
+            const currentChannel = wallpaper.channel || "HUMAN";
+            setChannel(currentChannel);
+            setUploadedUrl(wallpaper.url);
+
+            // For reschedule, we want the NEXT available date for this channel
+            fetchNextDate(currentChannel);
+
+        } else if (file) {
+            // New Upload
             setName("");
             setDescription("");
             setExternalUrl("");
             setChannel("HUMAN");
             setUploadedUrl("");
 
+            // Fetch next available date
+            fetchNextDate("HUMAN");
+
             // Start Upload Immediately
             handleUpload(file);
         }
-    }, [isOpen, file]);
+    }, [isOpen, file, wallpaper, mode]);
 
     // Fetch next available date when channel changes
     useEffect(() => {
@@ -113,17 +143,33 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
         setIsSubmitting(true);
 
         try {
-            const res = await fetch("/api/wallpapers", {
-                method: "POST",
-                body: JSON.stringify({
-                    url: uploadedUrl,
-                    name,
-                    description,
-                    externalUrl,
-                    channel,
-                    releaseDate: date,
-                }),
-            });
+            let res;
+            if (wallpaper) {
+                // Update existing
+                res = await fetch(`/api/wallpapers/${wallpaper.id}`, {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        name,
+                        description,
+                        externalUrl,
+                        channel,
+                        releaseDate: date,
+                    }),
+                });
+            } else {
+                // Create new
+                res = await fetch("/api/wallpapers", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        url: uploadedUrl,
+                        name,
+                        description,
+                        externalUrl,
+                        channel,
+                        releaseDate: date,
+                    }),
+                });
+            }
 
             if (res.ok) {
                 router.refresh();
@@ -148,7 +194,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl }: Uploa
                     <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Add Details</h2>
 
                     <div className="mb-6 rounded-lg overflow-hidden aspect-video bg-gray-100 relative group">
-                        <img src={previewUrl} alt="Preview" className={`absolute inset-0 w-full h-full object-cover ${isUploading ? 'opacity-50' : ''}`} />
+                        <img src={previewUrl || uploadedUrl} alt="Preview" className={`absolute inset-0 w-full h-full object-cover ${isUploading ? 'opacity-50' : ''}`} />
 
                         {isUploading && (
                             <div className="absolute inset-0 flex items-center justify-center">
