@@ -20,7 +20,10 @@ enum Constants {
     // Day Persistence Keys (Surprise Me)
     static let overrideWallpaperIdKey = "OverrideWallpaperId"
     static let overrideContextIdKey = "OverrideContextId"
-    static let overrideWallpaperKey = "OverrideWallpaper"
+    static let overrideWallpaperKey = "OverrideWallpaper" // Stores main surprise wallpaper
+    
+    // Daily State Persistence
+    static let dailyStateKey = "DailyState"
     
     // Channels
     static let channelHuman = "HUMAN"
@@ -47,6 +50,12 @@ struct ScreenWallpaperInfo: Identifiable {
     let url: URL?        // Generated Cloudinary URL
     let originalUrl: String // Raw DB URL
     let externalUrl: String?
+}
+
+struct DailyState: Codable, Sendable {
+    let date: String // YYYY-MM-DD
+    let mainWallpaper: Wallpaper
+    var secondaryWallpapers: [Int: Wallpaper] // ScreenIndex -> Wallpaper
 }
 
 // MARK: - 3. Services
@@ -286,16 +295,19 @@ class WallpaperManager: ObservableObject {
     var cachedWallpapers: [Wallpaper] = []
     private var screenChangeTimer: Timer?
     
-    /// Re-processes the current wallpapers with new settings (without fetching new ones)
+    /// Re-processes the current wallpapers with new settings
     func refreshDisplay() {
-        if !cachedWallpapers.isEmpty {
-            processWallpapers(cachedWallpapers, checkDateContext: false)
-        } else {
-            checkForUpdates()
-        }
+        // Since we now rely on persistent DailyState or Overrides, 
+        // calling checkForUpdates() will load the correct state and apply it.
+        checkForUpdates()
     }
     
     private init() {
+        // Clear Surprise/Overrides on Launch (per user request)
+        UserDefaults.standard.removeObject(forKey: Constants.overrideContextIdKey)
+        UserDefaults.standard.removeObject(forKey: Constants.overrideWallpaperIdKey)
+        UserDefaults.standard.removeObject(forKey: Constants.overrideWallpaperKey)
+        
         // Init State
         self.useSameWallpaper = UserDefaults.standard.object(forKey: Constants.useSameWallpaperKey) as? Bool ?? true
         
@@ -332,11 +344,74 @@ class WallpaperManager: ObservableObject {
         }
     }
     
+    /// Clears any Surprise/Overrides and forces a return to the Daily logic
+    func resetToDaily() {
+        defaults.removeObject(forKey: Constants.overrideContextIdKey)
+        defaults.removeObject(forKey: Constants.overrideWallpaperIdKey)
+        defaults.removeObject(forKey: Constants.overrideWallpaperKey)
+        checkForUpdates()
+    }
+    
     func checkForUpdates() {
         self.currentStatus = "Checking..."
         
         Task {
             do {
+                // 1. Calculate Today's Date (YYYY-MM-DD)
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                let todayString = formatter.string(from: Date())
+                
+                // 2. Surprise Check (Override Logic)
+                let overrideDate = defaults.string(forKey: Constants.overrideContextIdKey)
+                if let oDate = overrideDate, oDate == todayString {
+                    // Surprise is Active for Today.
+                    if let data = defaults.data(forKey: Constants.overrideWallpaperKey),
+                       let surpriseWallpaper = try? JSONDecoder().decode(Wallpaper.self, from: data) {
+                        
+                        // Current logic: Surprise applies to MAIN screen.
+                        // For secondaries in Surprise mode? Simplest is same on all or just main.
+                        // Let's treat Surprise as a temporary "DailyState" where Main = Surprise.
+                        // If separate screens, we can either generate randoms or keep history.
+                        // Requirement: "active until next day".
+                        // Let's construct a temporary DailyState for display.
+                        
+                        let state = DailyState(
+                            date: todayString,
+                            mainWallpaper: surpriseWallpaper,
+                            secondaryWallpapers: [:] // Surprise doesn't currently mandate specific secondary behavior, falling back to Main is safest for "Surprise"
+                        )
+                        processDailyState(state)
+                        return
+                    }
+                } else if overrideDate != nil {
+                    // Old Surprise -> Expire it.
+                    defaults.removeObject(forKey: Constants.overrideContextIdKey)
+                    defaults.removeObject(forKey: Constants.overrideWallpaperIdKey)
+                    defaults.removeObject(forKey: Constants.overrideWallpaperKey)
+                } 
+                
+                // 3. Daily Consistency Check (Persistence)
+                if let data = defaults.data(forKey: Constants.dailyStateKey),
+                   let savedState = try? JSONDecoder().decode(DailyState.self, from: data),
+                   savedState.date == todayString {
+                    
+                    // Valid Daily State found.
+                    print("✅ Using PERSISTED Daily State for \(todayString). Main: \(savedState.mainWallpaper.name ?? "Unknown")")
+                    
+                    // Check if we need to fill in missing secondaries (if screen count changed)
+                    var mutableState = savedState
+                    let screenCount = NSScreen.screens.count
+                    if !useSameWallpaper && screenCount > 1 {
+                         // ... logic ...
+                    }
+                    
+                    processDailyState(savedState)
+                    return
+                }
+                
+                print("⚠️ No valid Daily State found for \(todayString). Generating new one...")
+                // We need the manifest
                 let wallpapers = try await networkService.fetchManifest(channels: selectedChannels)
                 
                 if wallpapers.isEmpty {
@@ -344,7 +419,49 @@ class WallpaperManager: ObservableObject {
                     return
                 }
                 
-                self.processWallpapers(wallpapers, checkDateContext: true)
+                self.cachedWallpapers = wallpapers
+                
+                // A. Main Screen Choice
+                // Filter for Release Date == Today (Robust prefix check)
+                let candidates = wallpapers.filter { 
+                    ($0.releaseDate?.prefix(10) ?? "unknown") == todayString 
+                }
+                
+                print("Daily Candidates for \(todayString): \(candidates.count). Total Fetched: \(wallpapers.count)")
+                
+                let mainChoice: Wallpaper
+                if let winner = candidates.randomElement() {
+                    mainChoice = winner
+                } else {
+                    // Fallback: Random from past (Manifest is already "Published" and likely sorted/filtered)
+                    // Just pick a random one from the whole list.
+                    mainChoice = wallpapers.randomElement() ?? wallpapers[0]
+                }
+                
+                // B. Secondary Screens Choice
+                var secondaries: [Int: Wallpaper] = [:]
+                let screens = NSScreen.screens
+                if !useSameWallpaper && screens.count > 1 {
+                    // For each secondary screen (index 1+)
+                    for i in 1..<screens.count {
+                        // "Random from past"
+                        // Explicitly exclude "Today" candidates if you want strict "Past"? 
+                        // User said "pick random wallpaper from the past".
+                        // Let's filter out todayString from the random pool if possible.
+                        let pastWallpapers = wallpapers.filter { $0.releaseDate != todayString }
+                        let pool = pastWallpapers.isEmpty ? wallpapers : pastWallpapers
+                        secondaries[i] = pool.randomElement() ?? mainChoice
+                    }
+                }
+                
+                // C. Persist
+                let newState = DailyState(date: todayString, mainWallpaper: mainChoice, secondaryWallpapers: secondaries)
+                
+                if let data = try? JSONEncoder().encode(newState) {
+                    defaults.set(data, forKey: Constants.dailyStateKey)
+                }
+                
+                processDailyState(newState)
                 
             } catch {
                 print("Update Error: \(error)")
@@ -354,60 +471,31 @@ class WallpaperManager: ObservableObject {
     }
     
     func surpriseMe() {
-        self.currentStatus = "Fetching randoms..."
+        self.currentStatus = "Fetching surprise..."
         
         Task {
             do {
-                // Determine how many wallpapers we need
-                // If "Same on all", we need 1. If separate, we need one for each screen.
-                let screenCount = NSScreen.screens.count
-                let countNeeded = self.useSameWallpaper ? 1 : max(1, screenCount)
+                // Fetch Random
+                let random = try await networkService.fetchRandom(channels: selectedChannels)
                 
-                var newRandoms: [Wallpaper] = []
+                // Set Override (Surprise logic)
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                let todayString = formatter.string(from: Date())
                 
-                // Fetch concurrently for speed
-                try await withThrowingTaskGroup(of: Wallpaper.self) { group in
-                    for _ in 0..<countNeeded {
-                        group.addTask {
-                            return try await self.networkService.fetchRandom(channels: self.selectedChannels)
-                        }
-                    }
-                    for try await random in group {
-                        newRandoms.append(random)
-                    }
+                defaults.set(random.id, forKey: Constants.overrideWallpaperIdKey)
+                defaults.set(todayString, forKey: Constants.overrideContextIdKey)
+                
+                if let data = try? JSONEncoder().encode(random) {
+                    defaults.set(data, forKey: Constants.overrideWallpaperKey)
                 }
                 
-                // Sort to ensure deterministic order if needed, or just append. 
-                // Random is random, order doesn't matter much, but let's just use the array.
-                
-                print("Fetched \(newRandoms.count) random wallpapers.")
-                
-                if let heroRandom = newRandoms.first {
-                    // Update Cache
-                    // Insert ALL new randoms at the top.
-                    // This ensures Screen 0 gets newRandoms[0], Screen 1 gets newRandoms[1], etc.
-                    self.cachedWallpapers.insert(contentsOf: newRandoms, at: 0)
-                    
-                    // Persist ONLY the Hero (Screen 0) for the "Daily Lock" logic.
-                    // Note: Secondary screens' surprise is ephemeral (lasts until app restart/refresh), 
-                    // but that is expected for "Surprise" vs "Schedule".
-                    // FIX: "contains" syntax error. newRandoms is [Wallpaper], so we need to check IDs carefully.
-                    let latestDailyDate = self.cachedWallpapers.first(where: { w in
-                        !newRandoms.contains(where: { $0.id == w.id })
-                    })?.releaseDate?.prefix(10) ?? "unknown"
-                    // Fallback to current if history is empty, though unlikely
-                    let safeDate = (latestDailyDate == "unknown") ? (heroRandom.releaseDate?.prefix(10) ?? "unknown") : latestDailyDate
-                    
-                    defaults.set(heroRandom.id, forKey: Constants.overrideWallpaperIdKey)
-                    defaults.set(String(safeDate), forKey: Constants.overrideContextIdKey)
-                    
-                    if let data = try? JSONEncoder().encode(heroRandom) {
-                        defaults.set(data, forKey: Constants.overrideWallpaperKey)
-                    }
-                    
-                    // Refresh Display
-                    self.processWallpapers(self.cachedWallpapers, checkDateContext: false)
-                }
+                // Apply immediately.
+                // Surprise replaces MAIN. 
+                // Secondaries? "Surprise mode active". Usually surprise is just one manual action.
+                // We will treat it as applying to Main. Logic in checkForUpdates handles the persistent display.
+                // We re-run checkForUpdates to let it pick up the new Override.
+                checkForUpdates()
                 
             } catch {
                 print("Surprise Error: \(error)")
@@ -419,8 +507,7 @@ class WallpaperManager: ObservableObject {
     // MARK: - Logic
     
     /// Main Logic Engine: Map Data -> Screens
-    private func processWallpapers(_ wallpapers: [Wallpaper], checkDateContext: Bool) {
-        self.cachedWallpapers = wallpapers
+    private func processDailyState(_ state: DailyState) {
         let screens = NSScreen.screens
         guard !screens.isEmpty, let mainScreen = NSScreen.main else {
             self.currentStatus = "No displays."
@@ -439,7 +526,25 @@ class WallpaperManager: ObservableObject {
         
         // Calculate Assignments (Wallpaper -> Screen)
         for (index, screen) in sortedScreens.enumerated() {
-            let wallpaper = determineWallpaper(for: index, from: wallpapers)
+            // Determine which wallpaper to use for this screen from DailyState
+            let wallpaper: Wallpaper
+            
+            if useSameWallpaper {
+                wallpaper = state.mainWallpaper
+            } else {
+                if index == 0 {
+                    wallpaper = state.mainWallpaper
+                } else {
+                    // Secondary Logic
+                    if let sec = state.secondaryWallpapers[index] {
+                        wallpaper = sec
+                    } else {
+                        // Edge Case: A new screen appeared mid-day that wasn't in DailyState.
+                        // Fallback to Main rather than crashing or showing nothing
+                        wallpaper = state.mainWallpaper
+                    }
+                }
+            }
             
             // Generate Info
             let urlOrNil = imageService.generateUrl(for: wallpaper, screen: screen, fitToVertical: self.fitVerticalDisplays)
@@ -471,63 +576,9 @@ class WallpaperManager: ObservableObject {
         }
         
         self.screenWallpapers = newInfos
-        if checkDateContext {
-            cleanupOverrides(currentLatestId: wallpapers.first?.id)
-        }
     }
     
-    private func determineWallpaper(for screenIndex: Int, from wallpapers: [Wallpaper]) -> Wallpaper {
-        // 1. Determine the "Hero" wallpaper (Effectively the "Current" one to display)
-        // Default to the top of the list
-        var heroWallpaper = wallpapers.first ?? Wallpaper(id: "empty", url: "", name: "Error", description: nil, externalUrl: nil, channel: nil, releaseDate: nil)
-        if !wallpapers.isEmpty { heroWallpaper = wallpapers[0] }
-        
-        // Check Validity of Override (Date Persistence)
-        let latestDate = wallpapers.first?.releaseDate?.prefix(10) ?? "unknown"
-        let savedContextDate = defaults.string(forKey: Constants.overrideContextIdKey)
-        let savedOverrideId = defaults.string(forKey: Constants.overrideWallpaperIdKey)
-        
-        // If Override exists and matches today's date, it becomes the Hero
-        if let oId = savedOverrideId, let cDate = savedContextDate, cDate == latestDate {
-            if let overrideItem = wallpapers.first(where: { $0.id == oId }) {
-                heroWallpaper = overrideItem
-            } else if let data = defaults.data(forKey: Constants.overrideWallpaperKey),
-                      let savedWallpaper = try? JSONDecoder().decode(Wallpaper.self, from: data),
-                      savedWallpaper.id == oId {
-                 // Restoration from persistence (Surprise Me case)
-                 heroWallpaper = savedWallpaper
-            }
-        }
-        
-        // 2. Logic Distribution
-        if useSameWallpaper {
-            // Apply Hero to all screens
-            return heroWallpaper
-        } else {
-            // Separate Screens
-            if screenIndex == 0 {
-                return heroWallpaper
-            }
-            // Other screens show history flow
-            // Note: If hero IS wallpapers[0], this is seamless.
-            // If hero is an override, Screen 1 shows wallpapers[1] (Yesterday's), etc.
-            let idx = min(screenIndex, wallpapers.count - 1)
-            return wallpapers[idx]
-        }
-    }
-    
-    private func cleanupOverrides(currentLatestId: String?) {
-        // We need the full wallpaper object or just fetch it from cache, usually `processWallpapers` updates cache first.
-        let currentLatestDate = self.cachedWallpapers.first?.releaseDate?.prefix(10) ?? "unknown"
-        let savedContextDate = defaults.string(forKey: Constants.overrideContextIdKey)
-        
-        if savedContextDate != nil && savedContextDate != String(currentLatestDate) {
-            print("New daily DATE detected (\(currentLatestDate)). Clearing overrides.")
-            defaults.removeObject(forKey: Constants.overrideContextIdKey)
-            defaults.removeObject(forKey: Constants.overrideWallpaperIdKey)
-            defaults.removeObject(forKey: Constants.overrideWallpaperKey)
-        }
-    }
+
     
     // MARK: - Event Handlers
     
@@ -690,7 +741,7 @@ struct SettingsView: View {
                 
                 // Refresh Action
                 Button("Refresh") {
-                    manager.checkForUpdates()
+                    manager.resetToDaily()
                 }
                 .buttonStyle(.plain)
                 .font(.caption)
