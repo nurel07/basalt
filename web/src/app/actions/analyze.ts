@@ -12,7 +12,17 @@ export async function analyzeImage(imageUrl: string) {
 
     try {
         // 1. Fetch the image
-        const response = await fetch(imageUrl);
+        // Optimization: If it's a Cloudinary URL, request a smaller/compressed version to save bandwidth/time
+        let fetchUrl = imageUrl;
+        if (imageUrl.includes("cloudinary.com")) {
+            // Insert transformations after /upload/
+            // w_1000: Limit width to 1000px (plenty for AI)
+            // q_auto: Automatic quality (compression)
+            // f_auto: Automatic format (usually webp/avif)
+            fetchUrl = imageUrl.replace("/upload/", "/upload/w_1000,q_auto,f_auto/");
+        }
+
+        const response = await fetch(fetchUrl);
         if (!response.ok) throw new Error("Failed to fetch image");
         const arrayBuffer = await response.arrayBuffer();
 
