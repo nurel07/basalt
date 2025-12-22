@@ -61,7 +61,13 @@ export async function analyzeImage(imageUrl: string) {
         // Clean up markdown code blocks if present
         const cleanJson = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-        return JSON.parse(cleanJson);
+        const data = JSON.parse(cleanJson);
+
+        // Normalize response
+        return {
+            ...data,
+            channel: data.type === "AI" ? "AI" : "HUMAN"
+        };
 
     } catch (error: any) {
         console.error("AI Analysis Failed:", error);
