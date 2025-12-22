@@ -326,28 +326,6 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                             )}
                         </div>
 
-                        import {checkDuplicateTitle} from "@/app/actions/validation";
-
-                        // ... inside component ...
-
-                        const [isDuplicate, setIsDuplicate] = useState(false);
-
-    useEffect(() => {
-        if (!name || channel !== "HUMAN") {
-                            setIsDuplicate(false);
-                        return;
-        }
-
-        const timer = setTimeout(async () => {
-            const isDup = await checkDuplicateTitle(name);
-                        setIsDuplicate(isDup);
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [name, channel]);
-
-                        // ... in JSX ...
-
                         <div>
                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
                             <input
