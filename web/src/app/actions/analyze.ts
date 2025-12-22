@@ -40,7 +40,7 @@ export async function analyzeImage(imageUrl: string) {
       Return a STRICT valid JSON object with these fields:
       - type (string): "Fine Art" or "AI"
       - title (string): The title of the artwork. for AI, generate a creative title.
-      - description (string): A compelling description.
+      - description (string): Short interesting facts about the piece.
       
       IF type is "Fine Art", also include:
       - artist (string): Name of the artist.
