@@ -32,6 +32,14 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
     const [channel, setChannel] = useState("HUMAN");
     const [date, setDate] = useState("");
 
+    // New Metadata Fields
+    const [artist, setArtist] = useState("");
+    const [creationDate, setCreationDate] = useState("");
+    const [genre, setGenre] = useState("");
+    const [movement, setMovement] = useState("");
+    const [dominantColors, setDominantColors] = useState<string[]>([]);
+    const [tags, setTags] = useState<string[]>([]);
+
     const [isUploading, setIsUploading] = useState(false);
     const [uploadedUrl, setUploadedUrl] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,6 +60,14 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
             setChannel(currentChannel);
             setUploadedUrl(wallpaper.url);
 
+            // New fields might not exist on old wallpapers, default to empty
+            setArtist((wallpaper as any).artist || "");
+            setCreationDate((wallpaper as any).creationDate || "");
+            setGenre((wallpaper as any).genre || "");
+            setMovement((wallpaper as any).movement || "");
+            setDominantColors((wallpaper as any).dominantColors || []);
+            setTags((wallpaper as any).tags || []);
+
             // For reschedule, we want the NEXT available date for this channel
             fetchNextDate(currentChannel);
 
@@ -63,8 +79,14 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
             setChannel(wallpaper.channel || "HUMAN");
             setUploadedUrl(wallpaper.url);
 
+            setArtist((wallpaper as any).artist || "");
+            setCreationDate((wallpaper as any).creationDate || "");
+            setGenre((wallpaper as any).genre || "");
+            setMovement((wallpaper as any).movement || "");
+            setDominantColors((wallpaper as any).dominantColors || []);
+            setTags((wallpaper as any).tags || []);
+
             // Set existing date
-            // Ensure we handle both Date object or string
             const d = new Date(wallpaper.releaseDate);
             setDate(d.toISOString().split('T')[0]);
 
@@ -75,6 +97,12 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
             setExternalUrl("");
             setChannel("HUMAN");
             setUploadedUrl("");
+            setArtist("");
+            setCreationDate("");
+            setGenre("");
+            setMovement("");
+            setDominantColors([]);
+            setTags([]);
 
             // Fetch next available date
             fetchNextDate("HUMAN");
@@ -98,7 +126,6 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                 if (data.date) {
                     setDate(data.date);
                 } else {
-                    // Fallback to tomorrow if API fails
                     const tomorrow = new Date();
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     setDate(tomorrow.toISOString().split('T')[0]);
@@ -106,7 +133,6 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
             })
             .catch(err => {
                 console.error("Failed to fetch next date:", err);
-                // Fallback
                 const tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 setDate(tomorrow.toISOString().split('T')[0]);
@@ -121,20 +147,28 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
         try {
             const data = await analyzeImage(uploadedUrl);
 
+            // Channel Detection
+            if (data.channel) setChannel(data.channel);
+
+            // Basic Info
             if (data.title) setName(data.title);
+            if (data.description) setDescription(data.description);
 
-            let desc = data.description || "";
-            if (data.artist && data.artist !== "Unknown") {
-                desc += `\n\nArtist: ${data.artist}`;
+            // Rich Metadata
+            if (data.channel === "HUMAN") {
+                if (data.artist) setArtist(data.artist);
+                if (data.creationDate) setCreationDate(data.creationDate);
+                if (data.genre) setGenre(data.genre);
+                if (data.movement) setMovement(data.movement);
+                if (data.dominantColors) setDominantColors(data.dominantColors);
+                if (data.tags) setTags(data.tags);
+            } else {
+                // Reset if AI detects it as AI generated
+                setArtist("");
+                setCreationDate("");
+                setGenre("");
+                setMovement("");
             }
-            if (data.date) {
-                desc += `\n\nDate: ${data.date}`;
-            }
-            if (data.tags && Array.isArray(data.tags)) {
-                desc += `\nTags: ${data.tags.join(", ")}`;
-            }
-
-            setDescription(desc);
 
         } catch (error: any) {
             console.error("Analysis error:", error);
@@ -147,12 +181,10 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
     const handleUpload = async (file: File) => {
         setIsUploading(true);
         try {
-            // 1. Get signature
             const signRes = await fetch("/api/cloudinary/sign", { method: "POST" });
             if (!signRes.ok) throw new Error("Failed to get upload signature");
             const { signature, timestamp, cloudName, apiKey } = await signRes.json();
 
-            // 2. Upload to Cloudinary
             const formData = new FormData();
             formData.append("file", file);
             formData.append("api_key", apiKey);
@@ -175,7 +207,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
         } catch (error: any) {
             console.error("Upload error:", error);
             alert(`Upload failed: ${error.message}`);
-            onClose(); // Close on upload failure? Or let them retry?
+            onClose();
         } finally {
             setIsUploading(false);
         }
@@ -190,32 +222,33 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
 
         setIsSubmitting(true);
 
+        const payload = {
+            name,
+            description,
+            externalUrl,
+            channel,
+            releaseDate: date,
+            artist,
+            creationDate,
+            genre,
+            movement,
+            dominantColors,
+            tags
+        };
+
         try {
             let res;
             if (wallpaper) {
                 // Update existing
                 res = await fetch(`/api/wallpapers/${wallpaper.id}`, {
                     method: "PUT",
-                    body: JSON.stringify({
-                        name,
-                        description,
-                        externalUrl,
-                        channel,
-                        releaseDate: date,
-                    }),
+                    body: JSON.stringify(payload),
                 });
             } else {
                 // Create new
                 res = await fetch("/api/wallpapers", {
                     method: "POST",
-                    body: JSON.stringify({
-                        url: uploadedUrl,
-                        name,
-                        description,
-                        externalUrl,
-                        channel,
-                        releaseDate: date,
-                    }),
+                    body: JSON.stringify({ ...payload, url: uploadedUrl }),
                 });
             }
 
@@ -237,59 +270,52 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="p-6 overflow-y-auto">
-                    <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Add Details</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <div className="mb-6 rounded-lg overflow-hidden aspect-video bg-gray-100 relative group">
-                        <img src={previewUrl || uploadedUrl} alt="Preview" className={`absolute inset-0 w-full h-full object-cover ${isUploading ? 'opacity-50' : ''}`} />
+                    {/* Left Column: Preview + Basic Info */}
+                    <div className="space-y-4">
+                        <div className="rounded-lg overflow-hidden aspect-video bg-gray-100 relative group">
+                            <img src={previewUrl || uploadedUrl} alt="Preview" className={`absolute inset-0 w-full h-full object-cover ${isUploading ? 'opacity-50' : ''}`} />
 
-                        {isUploading && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Uploading...
+                            {isUploading && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <div className="bg-black/50 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Uploading...
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {!isUploading && uploadedUrl && (
-                            <div className="absolute bottom-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded shadow">
-                                Uploaded
-                            </div>
+                            {!isUploading && uploadedUrl && (
+                                <button
+                                    type="button"
+                                    onClick={handleAnalyze}
+                                    disabled={isAnalyzing}
+                                    className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm px-3 py-2 rounded shadow flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50"
+                                >
+                                    {isAnalyzing ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Analyzing Art...
+                                        </>
+                                    ) : (
+                                        <>
+                                            ✨ Analyze with AI
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
 
-                        )}
-
-                        {!isUploading && uploadedUrl && (
-                            <button
-                                type="button"
-                                onClick={handleAnalyze}
-                                disabled={isAnalyzing}
-                                className="absolute bottom-2 left-2 bg-purple-600 text-white text-xs px-3 py-1.5 rounded shadow flex items-center gap-1.5 hover:bg-purple-700 transition-colors disabled:opacity-50"
-                            >
-                                {isAnalyzing ? (
-                                    <>
-                                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                        Analyzing...
-                                    </>
-                                ) : (
-                                    <>
-                                        ✨ Analyze with AI
-                                    </>
-                                )}
-                            </button>
-                        )}
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Name</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                placeholder="Wallpaper Name"
+                                placeholder="Artwork Title"
                             />
                         </div>
 
@@ -299,25 +325,92 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                rows={3}
+                                rows={4}
                                 placeholder="Enter a description..."
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">URL</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Tags</label>
                             <input
-                                type="url"
-                                value={externalUrl}
-                                onChange={(e) => setExternalUrl(e.target.value)}
+                                type="text"
+                                value={tags.join(", ")}
+                                onChange={(e) => setTags(e.target.value.split(",").map(t => t.trim()))}
                                 className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                placeholder="https://..."
+                                placeholder="landscape, impressionism, oil"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right Column: Metadata */}
+                    <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900 dark:text-white border-b pb-2">Details</h3>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Artist</label>
+                            <input
+                                type="text"
+                                value={artist}
+                                onChange={(e) => setArtist(e.target.value)}
+                                className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="Vincent van Gogh"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Year</label>
+                                <input
+                                    type="text"
+                                    value={creationDate}
+                                    onChange={(e) => setCreationDate(e.target.value)}
+                                    className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="1889"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Genre</label>
+                                <input
+                                    type="text"
+                                    value={genre}
+                                    onChange={(e) => setGenre(e.target.value)}
+                                    className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    placeholder="Landscape"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Movement</label>
+                            <input
+                                type="text"
+                                value={movement}
+                                onChange={(e) => setMovement(e.target.value)}
+                                className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="Post-Impressionism"
                             />
                         </div>
 
                         <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Dominant Colors</label>
+                            <div className="flex gap-2 mb-2 flex-wrap">
+                                {dominantColors.map((color, i) => (
+                                    <div key={i} className="w-8 h-8 rounded-full shadow border border-gray-200" style={{ backgroundColor: color }} title={color} />
+                                ))}
+                            </div>
+                            <input
+                                type="text"
+                                value={dominantColors.join(", ")}
+                                onChange={(e) => setDominantColors(e.target.value.split(",").map(c => c.trim()))}
+                                className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none text-xs"
+                                placeholder="#FF0000, #00FF00"
+                            />
+                        </div>
+
+
+                        <div className="pt-4 border-t">
                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Channel</label>
-                            <div className="flex gap-4">
+                            <div className="flex gap-4 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="radio"
@@ -327,7 +420,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                                         onChange={(e) => setChannel(e.target.value)}
                                         className="w-4 h-4 text-blue-600"
                                     />
-                                    <span className="text-gray-700 dark:text-gray-300">Human</span>
+                                    <span className="text-gray-700 dark:text-gray-300 font-medium">Fine Art (Human)</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -336,9 +429,9 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                                         value="AI"
                                         checked={channel === "AI"}
                                         onChange={(e) => setChannel(e.target.value)}
-                                        className="w-4 h-4 text-blue-600"
+                                        className="w-4 h-4 text-purple-600"
                                     />
-                                    <span className="text-gray-700 dark:text-gray-300">AI</span>
+                                    <span className="text-purple-600 dark:text-purple-300 font-medium">AI Generated</span>
                                 </label>
                             </div>
                         </div>
@@ -353,8 +446,18 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                                 required
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">External URL</label>
+                            <input
+                                type="url"
+                                value={externalUrl}
+                                onChange={(e) => setExternalUrl(e.target.value)}
+                                className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                placeholder="https://..."
+                            />
+                        </div>
 
-                        <div className="flex justify-end gap-3 mt-6">
+                        <div className="flex justify-end gap-3 pt-4">
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -370,10 +473,9 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                                 {isSubmitting ? "Saving..." : isUploading ? "Uploading..." : "Save Wallpaper"}
                             </button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-
     );
 }

@@ -18,7 +18,7 @@ export async function PUT(
 ) {
     const { id } = await params;
     const body = await request.json();
-    const { name, description, externalUrl, channel, releaseDate } = body;
+    const { name, description, externalUrl, channel, releaseDate, artist, creationDate, genre, movement, dominantColors, tags } = body;
 
     const wallpaper = await prisma.wallpaper.update({
         where: { id },
@@ -28,6 +28,12 @@ export async function PUT(
             externalUrl,
             channel,
             releaseDate: new Date(releaseDate),
+            artist,
+            creationDate,
+            genre,
+            movement,
+            dominantColors,
+            tags,
         },
     });
     return NextResponse.json(wallpaper);

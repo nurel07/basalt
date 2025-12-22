@@ -93,7 +93,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { url, name, description, externalUrl, channel, releaseDate } = body;
+        const { url, name, description, externalUrl, channel, releaseDate, artist, creationDate, genre, movement, dominantColors, tags } = body;
 
         const wallpaper = await prisma.wallpaper.create({
             data: {
@@ -103,6 +103,12 @@ export async function POST(request: Request) {
                 externalUrl,
                 channel: channel || "HUMAN",
                 releaseDate: new Date(releaseDate),
+                artist,
+                creationDate,
+                genre,
+                movement,
+                dominantColors,
+                tags,
             },
         });
 

@@ -30,13 +30,22 @@ export async function analyzeImage(imageUrl: string) {
         const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
         const prompt = `
-      Analyze this fine art wallpaper. 
-      Return a STRICT valid JSON object (no markdown formatting, no backticks) with these fields:
-      - title (string): The name of the artwork (or a creative one if unknown).
-      - artist (string): The name of the artist (or "Unknown").
-      - date (string): Year or timeframe (e.g. "1923" or "19th Century").
-      - description (string): A compelling 1-2 sentence description suitable for a wallpaper app.
-      - tags (array of strings): 5-7 keywords describing the style, subject, and mood.
+      Analyze this image. First, determine if it is "Fine Art" (human-made masterpiece) or "AI Generated" (digital art, midjourney, etc).
+      
+      Return a STRICT valid JSON object with these fields:
+      - type (string): "Fine Art" or "AI"
+      - title (string): The title of the artwork. for AI, generate a creative title.
+      - description (string): A compelling description.
+      
+      IF type is "Fine Art", also include:
+      - artist (string): Name of the artist.
+      - creationDate (string): Year or period (e.g. "1889").
+      - genre (string): e.g. "Landscape", "Portrait".
+      - movement (string): e.g. "Impressionism".
+      - dominantColors (array of strings): 3-5 hex codes.
+      - tags (array of strings): 5-7 keywords.
+
+      IF type is "AI", keep other fields empty or null.
     `;
 
         const imagePart = {

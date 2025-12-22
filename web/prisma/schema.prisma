@@ -20,4 +20,12 @@ model Wallpaper {
   releaseDate DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  // Rich Metadata
+  artist         String?
+  creationDate   String?   // Free text: "1889", "19th Century"
+  genre          String?   // "Landscape", "Portrait"
+  movement       String?   // "Impressionism", "Baroque"
+  dominantColors String[]  // Array of hex codes: ["#FF0000", "#00FF00"]
+  tags           String[]  // Keywords for search
 }
