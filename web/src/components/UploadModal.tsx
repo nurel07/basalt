@@ -51,12 +51,12 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
         }
 
         const timer = setTimeout(async () => {
-            const isDup = await checkDuplicateTitle(name);
+            const isDup = await checkDuplicateTitle(name, wallpaper?.id);
             setIsDuplicate(isDup);
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [name, channel]);
+    }, [name, channel, wallpaper?.id]);
 
     const [isUploading, setIsUploading] = useState(false);
     const [uploadedUrl, setUploadedUrl] = useState("");
