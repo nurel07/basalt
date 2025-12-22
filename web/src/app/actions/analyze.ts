@@ -16,10 +16,9 @@ export async function analyzeImage(imageUrl: string) {
         let fetchUrl = imageUrl;
         if (imageUrl.includes("cloudinary.com")) {
             // Insert transformations after /upload/
-            // w_1000: Limit width to 1000px (plenty for AI)
-            // q_auto: Automatic quality (compression)
-            // f_auto: Automatic format (usually webp/avif)
-            fetchUrl = imageUrl.replace("/upload/", "/upload/w_1000,q_auto,f_auto/");
+            // Match the Admin Grid transformation to reuse cache/transformations
+            // Grid uses: w_1200,q_auto,f_auto (from src/lib/cloudinary.ts)
+            fetchUrl = imageUrl.replace("/upload/", "/upload/w_1200,q_auto,f_auto/");
         }
 
         const response = await fetch(fetchUrl);
