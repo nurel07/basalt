@@ -58,7 +58,7 @@ export async function analyzeImage(imageUrl: string) {
         if (provider === "OPENAI") {
             const openai = new OpenAI();
             const completion = await openai.chat.completions.create({
-                model: "gpt-4o",
+                model: "gpt-5-nano-2025-08-07",
                 messages: [
                     {
                         role: "user",
