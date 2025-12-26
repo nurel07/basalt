@@ -22,6 +22,8 @@ export interface Wallpaper {
 export interface MobileCollection {
     id: string;
     name: string;
+    slug: string;
+    description?: string | null;
     coverImage?: string;
 }
 
