@@ -15,56 +15,55 @@ export default function MasonryGrid({ children, className = "", gap = "gap-6" }:
     // md: 768px -> 2 cols
     // lg: 1024px -> 3 cols
     useEffect(() => {
-        useEffect(() => {
-            const updateColumns = () => {
-                const width = window.innerWidth;
-                if (width >= 1536) { // 2xl
-                    setColumns(6);
-                } else if (width >= 1280) { // xl
-                    setColumns(5);
-                } else if (width >= 1024) { // lg
-                    setColumns(4);
-                } else if (width >= 768) { // md
-                    setColumns(3);
-                } else if (width >= 640) { // sm
-                    setColumns(2);
-                } else {
-                    setColumns(1);
-                }
-            };
+        const updateColumns = () => {
+            const width = window.innerWidth;
+            if (width >= 1536) { // 2xl
+                setColumns(6);
+            } else if (width >= 1280) { // xl
+                setColumns(5);
+            } else if (width >= 1024) { // lg
+                setColumns(4);
+            } else if (width >= 768) { // md
+                setColumns(3);
+            } else if (width >= 640) { // sm
+                setColumns(2);
+            } else {
+                setColumns(1);
+            }
+        };
 
-            updateColumns();
-            window.addEventListener("resize", updateColumns);
-            return () => window.removeEventListener("resize", updateColumns);
-        }, []);
+        updateColumns();
+        window.addEventListener("resize", updateColumns);
+        return () => window.removeEventListener("resize", updateColumns);
+    }, []);
 
-        const childrenArray = React.Children.toArray(children);
+    const childrenArray = React.Children.toArray(children);
 
-        // Create arrays for each column
-        const columnWrapper: React.ReactNode[][] = Array.from({ length: columns }, () => []);
+    // Create arrays for each column
+    const columnWrapper: React.ReactNode[][] = Array.from({ length: columns }, () => []);
 
-        // Distribute children: Child i goes to Column (i % numCols)
-        // This creates visual L-to-R sorting (1,2,3 at top) with vertical packing
-        childrenArray.forEach((child, i) => {
-            columnWrapper[i % columns].push(child);
-        });
+    // Distribute children: Child i goes to Column (i % numCols)
+    // This creates visual L-to-R sorting (1,2,3 at top) with vertical packing
+    childrenArray.forEach((child, i) => {
+        columnWrapper[i % columns].push(child);
+    });
 
-        return (
-            <div className={`flex ${gap} ${className}`}>
-                {columnWrapper.map((colChildren, colIndex) => (
-                    <div key={colIndex} className={`flex flex-col flex-1 ${gap}`}>
-                        {/* 
+    return (
+        <div className={`flex ${gap} ${className}`}>
+            {columnWrapper.map((colChildren, colIndex) => (
+                <div key={colIndex} className={`flex flex-col flex-1 ${gap}`}>
+                    {/* 
                        gap-6 matches standard gap, but we might want to pass it dynamically.
                        The props 'gap' usually contains space-y logic or gap class. 
                        Here we use flex gap for the vertical spacing inside columns.
                     */}
-                        {colChildren.map((child, childIndex) => (
-                            <div key={childIndex}>
-                                {child}
-                            </div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-        );
-    }
+                    {colChildren.map((child, childIndex) => (
+                        <div key={childIndex}>
+                            {child}
+                        </div>
+                    ))}
+                </div>
+            ))}
+        </div>
+    );
+}
