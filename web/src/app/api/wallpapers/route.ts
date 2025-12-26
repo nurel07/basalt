@@ -53,13 +53,13 @@ export async function GET(request: Request) {
         // Rotation Logic: Equal exposure for same-day wallpapers
         // If sorting puts multiple wallpapers from the "Same Day" at the top,
         // we rotate which one is at index 0 every 90 minutes.
-        if (wallpapers.length > 1) {
+        if (wallpapers.length > 1 && wallpapers[0].releaseDate) {
             const topDate = new Date(wallpapers[0].releaseDate).toDateString();
 
             // Find all wallpapers belonging to this Latest Day
             let sameDayCount = 0;
             for (const wp of wallpapers) {
-                if (new Date(wp.releaseDate).toDateString() === topDate) {
+                if (wp.releaseDate && new Date(wp.releaseDate).toDateString() === topDate) {
                     sameDayCount++;
                 } else {
                     break;
@@ -113,8 +113,8 @@ export async function POST(request: Request) {
                 description,
                 externalUrl,
                 channel: channel || "HUMAN",
-                // Handled optional releaseDate in schema, but good to check if passed
-                releaseDate: releaseDate ? new Date(releaseDate) : null,
+                // Handled optional releaseDate in schema
+                ...(releaseDate ? { releaseDate: new Date(releaseDate) } : {}),
                 artist,
                 creationDate,
                 genre,
