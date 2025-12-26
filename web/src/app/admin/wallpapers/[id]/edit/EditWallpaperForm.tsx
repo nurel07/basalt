@@ -11,7 +11,7 @@ interface Wallpaper {
     description: string | null;
     externalUrl: string | null;
     channel: string;
-    releaseDate: Date;
+    releaseDate: Date | null;
 }
 
 export default function EditWallpaperForm({ wallpaper }: { wallpaper: Wallpaper }) {
