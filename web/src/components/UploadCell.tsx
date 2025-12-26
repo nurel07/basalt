@@ -5,7 +5,11 @@ import { useDropzone } from "react-dropzone";
 import { Upload, Loader2 } from "lucide-react";
 import UploadModal from "./UploadModal";
 
-export default function UploadCell() {
+interface UploadCellProps {
+    initialCollectionId?: string;
+}
+
+export default function UploadCell({ initialCollectionId }: UploadCellProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState("");
@@ -62,6 +66,7 @@ export default function UploadCell() {
                 }}
                 file={selectedFile}
                 previewUrl={previewUrl}
+                initialCollectionId={initialCollectionId}
             />
         </>
     );
