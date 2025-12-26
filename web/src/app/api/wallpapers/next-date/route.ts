@@ -29,7 +29,10 @@ export async function GET(request: Request) {
             },
         });
 
-        const takenDates = wallpapers.map((w) => startOfDay(w.releaseDate));
+        const takenDates = wallpapers
+            .map((w) => w.releaseDate)
+            .filter((date): date is Date => date !== null)
+            .map((date) => startOfDay(date));
 
         // Start looking from tomorrow
         let checkDate = addDays(startOfDay(new Date()), 1);
