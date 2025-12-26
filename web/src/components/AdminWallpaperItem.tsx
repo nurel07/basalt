@@ -34,14 +34,14 @@ export default function AdminWallpaperItem({ wallpaper, onReschedule, onEdit }: 
     return (
         <div className="group relative">
             <img
-                src={getOptimizedUrl(wallpaper.url)}
+                src={getOptimizedUrl(wallpaper.url, 600)}
                 alt={wallpaper.name || wallpaper.description || "Wallpaper"}
-                className="w-full h-auto object-cover block"
+                className="w-full h-auto object-cover block rounded-lg"
                 loading="lazy"
             />
 
             {/* Overlay with buttons, visible only on hover */}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-4">
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-4 rounded-lg">
                 <div className="flex justify-end gap-2">
                     {onReschedule && (
                         <button
@@ -75,9 +75,11 @@ export default function AdminWallpaperItem({ wallpaper, onReschedule, onEdit }: 
                 </div>
 
                 <div className="text-white">
-                    <p className="font-bold text-sm mb-1">
-                        {wallpaper.releaseDate ? format(new Date(wallpaper.releaseDate), "yyyy-MM-dd") : "No Date"}
-                    </p>
+                    {wallpaper.type !== "MOBILE" && (
+                        <p className="font-bold text-sm mb-1">
+                            {wallpaper.releaseDate ? format(new Date(wallpaper.releaseDate), "yyyy-MM-dd") : "No Date"}
+                        </p>
+                    )}
                     {wallpaper.name && <p className="font-semibold text-sm truncate">{wallpaper.name}</p>}
                     {wallpaper.description && <p className="text-xs opacity-90 line-clamp-2">{wallpaper.description}</p>}
                 </div>

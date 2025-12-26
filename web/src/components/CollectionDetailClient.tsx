@@ -55,7 +55,7 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
             </div>
 
             {/* Content */}
-            <MasonryGrid gap="gap-0 space-y-0">
+            <MasonryGrid gap="gap-4" className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 <UploadCell initialCollectionId={collection.id} />
 
                 {wallpapers.map((wallpaper) => (
