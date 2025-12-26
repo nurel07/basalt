@@ -1,22 +1,45 @@
-"use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { MobileCollection } from "./UploadModal";
 
 interface CreateCollectionModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialData?: MobileCollection;
 }
 
-export default function CreateCollectionModal({ isOpen, onClose }: CreateCollectionModalProps) {
+export default function CreateCollectionModal({ isOpen, onClose, initialData }: CreateCollectionModalProps) {
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
     const [description, setDescription] = useState("");
     const [coverImage, setCoverImage] = useState("");
+
+    // Track if user manually edited slug to avoid auto-generating it on name change if they customized it
+    const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+
     const [isUploading, setIsUploading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const router = useRouter();
+
+    // Reset or Initialize form when modal opens or initialData changes
+    useEffect(() => {
+        if (isOpen) {
+            if (initialData) {
+                setName(initialData.name);
+                setSlug(initialData.slug);
+                setDescription(initialData.description || "");
+                setCoverImage(initialData.coverImage || "");
+                setIsSlugManuallyEdited(true); // Don't auto-update slug when editing existing
+            } else {
+                setName("");
+                setSlug("");
+                setDescription("");
+                setCoverImage("");
+                setIsSlugManuallyEdited(false);
+            }
+        }
+    }, [isOpen, initialData]);
 
     if (!isOpen) return null;
 
@@ -29,7 +52,9 @@ export default function CreateCollectionModal({ isOpen, onClose }: CreateCollect
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setName(val);
-        setSlug(generateSlug(val));
+        if (!isSlugManuallyEdited && !initialData) {
+            setSlug(generateSlug(val));
+        }
     };
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +75,7 @@ export default function CreateCollectionModal({ isOpen, onClose }: CreateCollect
             formData.append("api_key", apiKey);
             formData.append("timestamp", timestamp.toString());
             formData.append("signature", signature);
-            formData.append("folder", "collections"); // Specific folder for collections
+            formData.append("folder", "collections");
 
             const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: "POST",
@@ -75,25 +100,30 @@ export default function CreateCollectionModal({ isOpen, onClose }: CreateCollect
 
         setIsSubmitting(true);
         try {
-            const res = await fetch("/api/collections", {
-                method: "POST",
-                body: JSON.stringify({ name, slug, description, coverImage }),
-            });
+            let res;
+            if (initialData) {
+                // UPDATE
+                res = await fetch(`/api/collections/${initialData.id}`, {
+                    method: "PUT",
+                    body: JSON.stringify({ name, slug, description, coverImage }),
+                });
+            } else {
+                // CREATE
+                res = await fetch("/api/collections", {
+                    method: "POST",
+                    body: JSON.stringify({ name, slug, description, coverImage }),
+                });
+            }
 
             if (res.ok) {
                 router.refresh();
                 onClose();
-                // Reset form
-                setName("");
-                setSlug("");
-                setDescription("");
-                setCoverImage("");
             } else {
-                alert("Error creating collection");
+                alert("Error saving collection");
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Error creating collection");
+            alert("Error saving collection");
         } finally {
             setIsSubmitting(false);
         }
@@ -103,7 +133,9 @@ export default function CreateCollectionModal({ isOpen, onClose }: CreateCollect
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <h2 className="text-xl font-bold dark:text-white">New Collection</h2>
+                    <h2 className="text-xl font-bold dark:text-white">
+                        {initialData ? "Edit Collection" : "New Collection"}
+                    </h2>
 
                     <div>
                         <label className="block text-sm font-medium mb-1 dark:text-gray-300">Name</label>
@@ -122,7 +154,10 @@ export default function CreateCollectionModal({ isOpen, onClose }: CreateCollect
                         <input
                             type="text"
                             value={slug}
-                            onChange={(e) => setSlug(e.target.value)}
+                            onChange={(e) => {
+                                setSlug(e.target.value);
+                                setIsSlugManuallyEdited(true);
+                            }}
                             className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-900 dark:border-gray-700 outline-none text-sm font-mono text-gray-500"
                             placeholder="abstract-textures"
                             required
@@ -172,7 +207,7 @@ export default function CreateCollectionModal({ isOpen, onClose }: CreateCollect
                             disabled={isSubmitting || isUploading || !name || !coverImage}
                             className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 disabled:opacity-50 transition-colors font-medium"
                         >
-                            {isSubmitting ? "Creating..." : "Create Collection"}
+                            {isSubmitting ? "Saving..." : (initialData ? "Save Changes" : "Create Collection")}
                         </button>
                     </div>
                 </form>

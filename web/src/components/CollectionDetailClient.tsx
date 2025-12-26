@@ -6,6 +6,7 @@ import MasonryGrid from "@/components/MasonryGrid";
 import AdminWallpaperItem from "@/components/AdminWallpaperItem";
 import UploadModal, { MobileCollection, Wallpaper } from "@/components/UploadModal";
 import UploadCell from "@/components/UploadCell";
+import CreateCollectionModal from "@/components/CreateCollectionModal";
 
 interface CollectionDetailClientProps {
     collection: MobileCollection;
@@ -15,6 +16,7 @@ interface CollectionDetailClientProps {
 export default function CollectionDetailClient({ collection, wallpapers }: CollectionDetailClientProps) {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
     const [activeWallpaper, setActiveWallpaper] = useState<Wallpaper | undefined>(undefined);
     const [modalMode, setModalMode] = useState<"UPLOAD" | "RESCHEDULE" | "EDIT">("UPLOAD");
 
@@ -39,7 +41,16 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
                 </Link>
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold">{collection.name}</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold">{collection.name}</h1>
+                            <button
+                                onClick={() => setIsCollectionModalOpen(true)}
+                                className="text-gray-400 hover:text-blue-500 transition-colors"
+                                title="Edit Collection Details"
+                            >
+                                ✏️
+                            </button>
+                        </div>
                         <p className="text-gray-500">Collection Gallery</p>
                     </div>
                     <button
@@ -82,6 +93,13 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
                 previewUrl=""
                 collections={[collection]} // Pass just this collection so it's available in dropdown if checks needed
                 initialCollectionId={collection.id} // Pre-fill and lock to this collection (logic in Modal)
+            />
+
+            {/* Edit Collection Modal */}
+            <CreateCollectionModal
+                isOpen={isCollectionModalOpen}
+                onClose={() => setIsCollectionModalOpen(false)}
+                initialData={collection}
             />
         </div>
     );
