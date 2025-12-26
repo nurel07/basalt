@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import MasonryGrid from "./MasonryGrid";
 import AdminWallpaperItem from "./AdminWallpaperItem";
 import UploadCell from "./UploadCell";
@@ -145,12 +146,15 @@ export default function AdminDashboardTabs({
                         </div>
 
                         {collections.map(collection => (
-                            <div key={collection.id} className="aspect-[4/3] bg-gray-200 rounded-xl relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all">
+                            <Link href={`/admin/collections/${collection.id}`} key={collection.id} className="aspect-[4/3] bg-gray-200 rounded-xl relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all block">
                                 {/* Only Name for now since we don't have Cover Image in the minimal type yet */}
+                                {collection.coverImage && (
+                                    <img src={collection.coverImage} className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
                                     <h3 className="text-white font-bold text-lg">{collection.name}</h3>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
 
                         {/* Only show UploadCell if in Mobile Mode to add to collections? 

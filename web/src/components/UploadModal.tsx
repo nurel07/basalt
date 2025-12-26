@@ -22,6 +22,7 @@ export interface Wallpaper {
 export interface MobileCollection {
     id: string;
     name: string;
+    coverImage?: string;
 }
 
 interface UploadModalProps {
@@ -32,9 +33,10 @@ interface UploadModalProps {
     wallpaper?: Wallpaper;
     mode?: "UPLOAD" | "RESCHEDULE" | "EDIT";
     collections?: MobileCollection[]; // Optional because maybe not always loaded
+    initialCollectionId?: string;
 }
 
-export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpaper, mode = "UPLOAD", collections = [] }: UploadModalProps) {
+export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpaper, mode = "UPLOAD", collections = [], initialCollectionId }: UploadModalProps) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [externalUrl, setExternalUrl] = useState("");
@@ -42,8 +44,8 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
     const [date, setDate] = useState("");
 
     // Type & Collection
-    const [type, setType] = useState<"DESKTOP" | "MOBILE">("DESKTOP");
-    const [collectionId, setCollectionId] = useState("");
+    const [type, setType] = useState<"DESKTOP" | "MOBILE">(initialCollectionId ? "MOBILE" : "DESKTOP");
+    const [collectionId, setCollectionId] = useState(initialCollectionId || "");
 
     // New Metadata Fields
     const [artist, setArtist] = useState("");
