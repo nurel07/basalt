@@ -12,9 +12,7 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
     const [description, setDescription] = useState("");
-    const [name, setName] = useState("");
-    const [slug, setSlug] = useState("");
-    const [description, setDescription] = useState("");
+
 
     // Track if user manually edited slug to avoid auto-generating it on name change if they customized it
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
