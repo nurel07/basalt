@@ -16,6 +16,7 @@ export interface Wallpaper {
     channel: string | null;
     type: "DESKTOP" | "MOBILE";
     collectionId: string | null;
+    collectionOrder?: number;
     releaseDate: Date | string | null;
 }
 
