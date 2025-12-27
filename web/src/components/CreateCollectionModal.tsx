@@ -12,7 +12,9 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
     const [name, setName] = useState("");
     const [slug, setSlug] = useState("");
     const [description, setDescription] = useState("");
-    const [coverImage, setCoverImage] = useState("");
+    const [name, setName] = useState("");
+    const [slug, setSlug] = useState("");
+    const [description, setDescription] = useState("");
 
     // Track if user manually edited slug to avoid auto-generating it on name change if they customized it
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
@@ -29,13 +31,11 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
                 setName(initialData.name);
                 setSlug(initialData.slug);
                 setDescription(initialData.description || "");
-                setCoverImage(initialData.coverImage || "");
                 setIsSlugManuallyEdited(true); // Don't auto-update slug when editing existing
             } else {
                 setName("");
                 setSlug("");
                 setDescription("");
-                setCoverImage("");
                 setIsSlugManuallyEdited(false);
             }
         }
@@ -57,61 +57,31 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
         }
     };
 
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
 
-        setIsUploading(true);
-        try {
-            const signRes = await fetch("/api/cloudinary/sign", {
-                method: "POST",
-                body: JSON.stringify({ folder: "collections" }),
-            });
-            if (!signRes.ok) throw new Error("Failed to get upload signature");
-            const { signature, timestamp, cloudName, apiKey } = await signRes.json();
-
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("api_key", apiKey);
-            formData.append("timestamp", timestamp.toString());
-            formData.append("signature", signature);
-            formData.append("folder", "collections");
-
-            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!uploadRes.ok) throw new Error("Upload failed");
-
-            const data = await uploadRes.json();
-            setCoverImage(data.secure_url);
-        } catch (error) {
-            console.error("Upload error:", error);
-            alert("Failed to upload cover image");
-        } finally {
-            setIsUploading(false);
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name || !slug || !coverImage) return;
+        if (!name || !slug) return;
 
         setIsSubmitting(true);
         try {
             let res;
             if (initialData) {
-                // UPDATE
+                // UPDATE - preserve existing coverImage (backend handles it if missing, or we send partial)
+                // Actually the API expects full object usually, but let's check. 
+                // Using initialData.coverImage ensures we don't break it. 
+                // But wait, if we want to NOT change it, we should just send what we have or let API handle it.
+                // Best approach: Send initialData.coverImage.
                 res = await fetch(`/api/collections/${initialData.id}`, {
                     method: "PUT",
-                    body: JSON.stringify({ name, slug, description, coverImage }),
+                    body: JSON.stringify({ name, slug, description, coverImage: initialData.coverImage }),
                 });
             } else {
-                // CREATE
+                // CREATE - Use a placeholder
+                const PLACEHOLDER_COVER = "https://placehold.co/600x800/222222/FFFFFF/png?text=Collection";
                 res = await fetch("/api/collections", {
                     method: "POST",
-                    body: JSON.stringify({ name, slug, description, coverImage }),
+                    body: JSON.stringify({ name, slug, description, coverImage: PLACEHOLDER_COVER }),
                 });
             }
 
@@ -174,25 +144,7 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Cover Image</label>
-                        <div className="relative aspect-[4/3] bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center group">
-                            {coverImage ? (
-                                <img src={coverImage} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
-                            ) : (
-                                <div className="text-gray-400 text-sm">
-                                    {isUploading ? "Uploading..." : "Click to Upload"}
-                                </div>
-                            )}
-                            <input
-                                type="file"
-                                onChange={handleUpload}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                                accept="image/*"
-                                disabled={isUploading}
-                            />
-                        </div>
-                    </div>
+
 
                     <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
                         <button
@@ -204,7 +156,7 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
                         </button>
                         <button
                             type="submit"
-                            disabled={isSubmitting || isUploading || !name || !coverImage}
+                            disabled={isSubmitting || isUploading || !name}
                             className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 disabled:opacity-50 transition-colors font-medium"
                         >
                             {isSubmitting ? "Saving..." : (initialData ? "Save Changes" : "Create Collection")}

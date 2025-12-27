@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import MasonryGrid from "@/components/MasonryGrid";
 import AdminWallpaperItem from "@/components/AdminWallpaperItem";
@@ -70,6 +70,11 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
 
     // Ordering State
     const [items, setItems] = useState(wallpapers);
+
+    // Sync state with props when router refreshes (e.g. after upload/delete)
+    useEffect(() => {
+        setItems(wallpapers);
+    }, [wallpapers]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
