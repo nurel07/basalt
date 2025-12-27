@@ -33,6 +33,7 @@ model Wallpaper {
   type           WallpaperType     @default(DESKTOP)
   collectionId   String?
   collection     MobileCollection? @relation(fields: [collectionId], references: [id])
+  collectionOrder Int              @default(0)
 }
 
 enum WallpaperType {

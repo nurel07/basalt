@@ -12,7 +12,7 @@ export default async function CollectionDetailPage({
         where: { id },
         include: {
             wallpapers: {
-                orderBy: { createdAt: "desc" },
+                orderBy: { collectionOrder: "asc" },
             },
         },
     });

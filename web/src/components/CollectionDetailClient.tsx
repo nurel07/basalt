@@ -13,6 +13,42 @@ interface CollectionDetailClientProps {
     wallpapers: Wallpaper[];
 }
 
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { reorderWallpapers } from "@/app/actions/collections";
+
+// Sortable Item Component
+function SortableWallpaperItem({ wallpaper, onEdit }: { wallpaper: Wallpaper; onEdit: (w: Wallpaper) => void }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id: wallpaper.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 1,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="relative group">
+            <div className="absolute top-2 left-2 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none">
+                #{wallpaper.collectionOrder}
+            </div>
+            <AdminWallpaperItem
+                wallpaper={wallpaper}
+                onEdit={onEdit}
+            />
+        </div>
+    );
+}
+
 export default function CollectionDetailClient({ collection, wallpapers }: CollectionDetailClientProps) {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +66,39 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
         setIsModalOpen(false);
         setActiveWallpaper(undefined);
         setModalMode("UPLOAD");
+    };
+
+    // Ordering State
+    const [items, setItems] = useState(wallpapers);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setItems((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+                const newItems = arrayMove(items, oldIndex, newIndex);
+
+                // Calculate new orders based on index
+                const updates = newItems.map((item, index) => ({
+                    id: item.id,
+                    order: index
+                }));
+
+                // Call server action (optimistic update already happened via state)
+                reorderWallpapers(updates);
+
+                return newItems;
+            });
+        }
     };
 
     return (
@@ -66,22 +135,37 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
             </div>
 
             {/* Content */}
-            <MasonryGrid gap="gap-4" variant="dense" className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                <UploadCell initialCollectionId={collection.id} />
+            {/* Content */}
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <SortableContext
+                    items={items.map(w => w.id)}
+                    strategy={rectSortingStrategy}
+                >
+                    <MasonryGrid gap="gap-4" variant="dense" className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        <div className="col-span-1">
+                            <UploadCell initialCollectionId={collection.id} />
+                        </div>
 
-                {wallpapers.map((wallpaper) => (
-                    <AdminWallpaperItem
-                        key={wallpaper.id}
-                        wallpaper={wallpaper}
-                        onEdit={handleEdit}
-                    />
-                ))}
-                {wallpapers.length === 0 && (
-                    <div className="col-span-full p-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
-                        No wallpapers in this collection yet.
-                    </div>
-                )}
-            </MasonryGrid>
+                        {items.map((wallpaper) => (
+                            <SortableWallpaperItem
+                                key={wallpaper.id}
+                                wallpaper={wallpaper}
+                                onEdit={handleEdit}
+                            />
+                        ))}
+                    </MasonryGrid>
+                </SortableContext>
+            </DndContext>
+
+            {items.length === 0 && (
+                <div className="p-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl mt-8">
+                    No wallpapers in this collection yet.
+                </div>
+            )}
 
             {/* Upload Modal */}
             <UploadModal
