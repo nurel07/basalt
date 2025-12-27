@@ -7,9 +7,10 @@ import UploadModal from "./UploadModal";
 
 interface UploadCellProps {
     initialCollectionId?: string;
+    className?: string;
 }
 
-export default function UploadCell({ initialCollectionId }: UploadCellProps) {
+export default function UploadCell({ initialCollectionId, className }: UploadCellProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState("");
@@ -37,7 +38,7 @@ export default function UploadCell({ initialCollectionId }: UploadCellProps) {
         <>
             <div
                 {...getRootProps()}
-                className={`relative w-full h-auto aspect-[16/10] bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center overflow-hidden group cursor-pointer transition-colors
+                className={`relative w-full h-auto ${className || 'aspect-[16/10]'} bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center overflow-hidden group cursor-pointer transition-colors
                     ${isDragActive ? 'border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}
                 `}
             >

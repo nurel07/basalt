@@ -19,7 +19,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { reorderWallpapers } from "@/app/actions/collections";
 
 // Sortable Item Component
-function SortableWallpaperItem({ wallpaper, onEdit }: { wallpaper: Wallpaper; onEdit: (w: Wallpaper) => void }) {
+function SortableWallpaperItem({ wallpaper, index, onEdit }: { wallpaper: Wallpaper; index: number; onEdit: (w: Wallpaper) => void }) {
     const {
         attributes,
         listeners,
@@ -39,7 +39,7 @@ function SortableWallpaperItem({ wallpaper, onEdit }: { wallpaper: Wallpaper; on
     return (
         <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="relative group">
             <div className="absolute top-2 left-2 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded backdrop-blur-sm pointer-events-none">
-                #{wallpaper.collectionOrder}
+                #{index + 1}
             </div>
             <AdminWallpaperItem
                 wallpaper={wallpaper}
@@ -86,22 +86,20 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            setItems((items) => {
-                const oldIndex = items.findIndex((item) => item.id === active.id);
-                const newIndex = items.findIndex((item) => item.id === over.id);
-                const newItems = arrayMove(items, oldIndex, newIndex);
+            const oldIndex = items.findIndex((item) => item.id === active.id);
+            const newIndex = items.findIndex((item) => item.id === over.id);
 
-                // Calculate new orders based on index
-                const updates = newItems.map((item, index) => ({
-                    id: item.id,
-                    order: index
-                }));
+            const newItems = arrayMove(items, oldIndex, newIndex);
+            setItems(newItems);
 
-                // Call server action (optimistic update already happened via state)
-                reorderWallpapers(updates);
+            // Calculate new orders based on index
+            const updates = newItems.map((item, index) => ({
+                id: item.id,
+                order: index
+            }));
 
-                return newItems;
-            });
+            // Call server action
+            await reorderWallpapers(updates);
         }
     };
 
@@ -151,13 +149,14 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
                 >
                     <MasonryGrid gap="gap-4" variant="dense" className="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                         <div className="col-span-1">
-                            <UploadCell initialCollectionId={collection.id} />
+                            <UploadCell initialCollectionId={collection.id} className="aspect-[9/16]" />
                         </div>
 
-                        {items.map((wallpaper) => (
+                        {items.map((wallpaper, index) => (
                             <SortableWallpaperItem
                                 key={wallpaper.id}
                                 wallpaper={wallpaper}
+                                index={index}
                                 onEdit={handleEdit}
                             />
                         ))}
