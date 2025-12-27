@@ -106,6 +106,19 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { url, name, description, externalUrl, channel, releaseDate, artist, creationDate, genre, movement, dominantColors, tags, type, collectionId } = body;
 
+        // Auto-assign order if adding to a collection
+        let collectionOrder = 0;
+        if (collectionId) {
+            const lastWallpaper = await prisma.wallpaper.findFirst({
+                where: { collectionId },
+                orderBy: { collectionOrder: "desc" },
+                select: { collectionOrder: true },
+            });
+            if (lastWallpaper) {
+                collectionOrder = lastWallpaper.collectionOrder + 1;
+            }
+        }
+
         const wallpaper = await prisma.wallpaper.create({
             data: {
                 url,
@@ -123,6 +136,7 @@ export async function POST(request: Request) {
                 tags,
                 type: type || "DESKTOP",
                 collectionId,
+                collectionOrder,
             },
         });
 

@@ -72,7 +72,11 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
     const [items, setItems] = useState(wallpapers);
 
     const sensors = useSensors(
-        useSensor(PointerSensor),
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
         useSensor(KeyboardSensor, {
             coordinateGetter: sortableKeyboardCoordinates,
         })
