@@ -317,6 +317,34 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
         }
     };
 
+
+    const handleAnalyzeTitle = async () => {
+        if (!name) return;
+        setIsAnalyzing(true);
+        try {
+            // Import dynamically or assume it's available via props/import
+            // Since we need to call the server action, make sure it is imported at top
+            const { analyzeTitle } = await import("@/app/actions/analyze");
+            const data = await analyzeTitle(name);
+
+            if (data.title) setName(data.title);
+            if (data.description) setDescription(data.description);
+            if (data.artist) setArtist(data.artist);
+            if (data.creationDate) setCreationDate(data.creationDate);
+            if (data.genre) setGenre(data.genre);
+            if (data.movement) setMovement(data.movement);
+            if (data.dominantColors) setDominantColors(data.dominantColors);
+            if (data.tags) setTags(data.tags);
+            setChannel("HUMAN");
+
+        } catch (error: any) {
+            console.error("Title Analysis error:", error);
+            alert(`Analysis failed: ${error.message}`);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -352,7 +380,7 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
                                         </>
                                     ) : (
                                         <>
-                                            ✨ Analyze with AI
+                                            ✨ Analyze Image
                                         </>
                                     )}
                                 </button>
@@ -361,16 +389,27 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
 
                         <div>
                             <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Title</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className={`w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 outline-none transition-all ${isDuplicate
-                                    ? "border-yellow-500 focus:ring-yellow-500"
-                                    : "border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
-                                    }`}
-                                placeholder="Artwork Title"
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className={`w-full p-2 pr-10 border rounded-lg bg-gray-50 dark:bg-gray-700 outline-none transition-all ${isDuplicate
+                                        ? "border-yellow-500 focus:ring-yellow-500"
+                                        : "border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
+                                        }`}
+                                    placeholder="Artwork Title"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleAnalyzeTitle}
+                                    disabled={!name || isAnalyzing}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500 disabled:opacity-30 disabled:hover:text-gray-400 transition-colors"
+                                    title="Analyze Title with AI"
+                                >
+                                    ✨
+                                </button>
+                            </div>
                             {isDuplicate && (
                                 <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1 flex items-center gap-1">
                                     ⚠️ Warning: A wallpaper with this title already exists.
