@@ -29,27 +29,39 @@ export async function GET(request: Request) {
             },
         });
 
-        const takenDates = wallpapers
-            .map((w) => w.releaseDate)
-            .filter((date): date is Date => date !== null)
-            .map((date) => startOfDay(date));
+        // Debug Log
+        console.log(`[NextDate] Found ${wallpapers.length} future wallpapers for channel: ${channel || 'ALL'}`);
+        // Log first few dates
+        const firstFew = wallpapers.slice(0, 5).map(w => w.releaseDate?.toISOString());
+        console.log(`[NextDate] Starts with: ${firstFew.join(', ')}`);
+
+        const takenDateStrings = new Set(
+            wallpapers
+                .map((w) => w.releaseDate)
+                .filter((date): date is Date => date !== null)
+                .map((date) => format(date, "yyyy-MM-dd"))
+        );
 
         // Start looking from tomorrow
         let checkDate = addDays(startOfDay(new Date()), 1);
 
         // Find the first gap
-        while (true) {
-            const isTaken = takenDates.some((takenDate) => isSameDay(takenDate, checkDate));
+        for (let i = 0; i < 730; i++) { // Limit to 2 years to prevent infinite loops safety
+            const checkString = format(checkDate, "yyyy-MM-dd");
+            const isTaken = takenDateStrings.has(checkString);
 
             if (!isTaken) {
-                // Found a gap!
+                console.log(`[NextDate] Found gap: ${checkString}`);
                 return NextResponse.json({
-                    date: format(checkDate, "yyyy-MM-dd")
+                    date: checkString
                 });
             }
 
             checkDate = addDays(checkDate, 1);
         }
+
+        // Fallback
+        return NextResponse.json({ date: format(addDays(new Date(), 1), "yyyy-MM-dd") });
 
     } catch (error) {
         console.error("Error calculating next date:", error);
