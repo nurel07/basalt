@@ -109,3 +109,57 @@ export async function analyzeImage(imageUrl: string) {
         throw new Error(error.message || "Failed to analyze image");
     }
 }
+
+export async function analyzeTitle(title: string) {
+    const provider = process.env.AI_PROVIDER || "GEMINI";
+
+    if (provider === "GEMINI" && !apiKey) throw new Error("GOOGLE_API_KEY is not set");
+    if (provider === "OPENAI" && !process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not set");
+
+    const prompt = `
+      You are an art expert. Provide metadata for the artwork titled "${title}".
+      
+      Return a STRICT valid JSON object with these fields:
+      - title (string): Correct full title if needed (e.g. "The Starry Night").
+      - description (string): Short interesting facts about the piece.
+      - artist (string): Name of the artist.
+      - creationDate (string): Year or period (e.g. "1889").
+      - genre (string): e.g. "Landscape", "Portrait".
+      - movement (string): e.g. "Impressionism".
+      - dominantColors (array of strings): 3-5 hex codes typical for this painting.
+      - tags (array of strings): 5-7 keywords.
+
+      If the artwork is unknown or generic, generate plausible artistic metadata or return minimal info.
+    `;
+
+    try {
+        let resultText = "";
+
+        if (provider === "OPENAI") {
+            const openai = new OpenAI();
+            const completion = await openai.chat.completions.create({
+                model: "gpt-5-nano-2025-08-07",
+                messages: [{ role: "user", content: prompt }],
+                response_format: { type: "json_object" }
+            });
+            resultText = completion.choices[0].message.content || "{}";
+        } else {
+            // GEMINI
+            const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+            const result = await model.generateContent(prompt);
+            resultText = result.response.text();
+        }
+
+        const cleanJson = resultText.replace(/```json/g, "").replace(/```/g, "").trim();
+        const data = JSON.parse(cleanJson);
+
+        return {
+            ...data,
+            channel: "HUMAN" // Assume title search implies existing fine art
+        };
+
+    } catch (error: any) {
+        console.error("AI Title Analysis Failed:", error);
+        throw new Error(error.message || "Failed to analyze title");
+    }
+}
