@@ -7,11 +7,11 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const channel = searchParams.get("channel");
 
-        // Build where clause
         const whereClause: any = {
             releaseDate: {
                 gte: new Date(), // Only look at today and future
             },
+            type: "DESKTOP", // Only verify Desktop/Daily schedule
         };
 
         if (channel) {
