@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { analyzeImage } from "@/app/actions/analyze";
+import { analyzeImage, analyzeTitle } from "@/app/actions/analyze";
 import { checkDuplicateTitle } from "@/app/actions/validation";
 
 
@@ -322,9 +322,6 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
         if (!name) return;
         setIsAnalyzing(true);
         try {
-            // Import dynamically or assume it's available via props/import
-            // Since we need to call the server action, make sure it is imported at top
-            const { analyzeTitle } = await import("@/app/actions/analyze");
             const data = await analyzeTitle(name);
 
             if (data.title) setName(data.title);
