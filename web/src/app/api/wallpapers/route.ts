@@ -50,42 +50,7 @@ export async function GET(request: Request) {
             ],
         });
 
-        // Rotation Logic: Equal exposure for same-day wallpapers
-        // If sorting puts multiple wallpapers from the "Same Day" at the top,
-        // we rotate which one is at index 0 every 90 minutes.
-        if (wallpapers.length > 1 && wallpapers[0].releaseDate) {
-            const topDate = new Date(wallpapers[0].releaseDate).toDateString();
 
-            // Find all wallpapers belonging to this Latest Day
-            let sameDayCount = 0;
-            for (const wp of wallpapers) {
-                if (wp.releaseDate && new Date(wp.releaseDate).toDateString() === topDate) {
-                    sameDayCount++;
-                } else {
-                    break;
-                }
-            }
-
-            if (sameDayCount > 1) {
-                // Calculate 90-minute block index
-                // Unix Timestamp (ms) / (1000 * 60 * 90)
-                const now = Date.now();
-                const intervalMs = 1000 * 60 * 90; // 90 minutes
-                const blockIndex = Math.floor(now / intervalMs);
-
-                // Determine which index (0 to sameDayCount-1) should be active
-                const activeIndex = blockIndex % sameDayCount;
-
-                if (activeIndex !== 0) {
-                    // Swap the active item to the top
-                    const activeItem = wallpapers[activeIndex];
-                    wallpapers.splice(activeIndex, 1); // Remove from current spot
-                    wallpapers.unshift(activeItem);    // Add to top
-
-                    console.log(`[Rotation] Swapped index ${activeIndex} to top for 90min rotation.`);
-                }
-            }
-        }
 
         console.log("- Wallpapers Found:", wallpapers.length);
 
