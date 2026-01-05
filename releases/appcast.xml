@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Basalt</title>
+        <item>
+            <title>1.0</title>
+            <pubDate>Sun, 04 Jan 2026 11:23:27 +0200</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.6</sparkle:minimumSystemVersion>
+            <enclosure url="https://basalt.yevgenglukhov.com/Basalt.zip" length="10682645" type="application/octet-stream" sparkle:edSignature="MzYnCqQL41fyGQ9EqzZSRtKr7nur4RHjm3VBYMSO9eO/zXFt8kD87f9mLdATRxkPNBQhJ76XX+aapat6kaesDQ=="/>
+        </item>
+    </channel>
+</rss>
