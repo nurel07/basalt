@@ -204,6 +204,13 @@ struct ImageService {
     }
     
     private func injectCloudinaryParams(url: String, width: Int, height: Int, text: String, showText: Bool, fitToVertical: Bool) -> URL? {
+        // 0. Cloudflare / Non-Cloudinary Passthrough
+        // If it's NOT a cloudinary URL, we just return it as is.
+        // Meaning: Cloudflare images will NOT have text overlays for now (as requested).
+        if !url.contains("cloudinary.com") {
+            return URL(string: url)
+        }
+
         let keyword = Constants.uploadKeyword
         guard let range = url.range(of: keyword) else {
             return URL(string: url)
@@ -226,6 +233,9 @@ struct ImageService {
             // Stable, premium, and neutral dark background. Auto-colors caused 400 errors.
             // f_jpg: Force JPEG for predictable macOS wallpaper support.
             resize = "w_\(width),h_\(height),c_pad,b_rgb:1c1c1e,f_jpg"
+            
+            // Note: If using Cloudflare in future, we would use /cdn-cgi/image/width=...
+            // But we can't do text overlay there easily.
         } else {
             // c_fill: Crop to fill dims
             resize = "w_\(width),h_\(height),c_fill,f_jpg"
@@ -419,7 +429,14 @@ class WallpaperManager: ObservableObject {
     
     func toggleChannel(_ channel: String) {
         if selectedChannels.contains(channel) {
-            selectedChannels.remove(channel)
+            // Guardrail: Prevent disabling the last channel
+            if selectedChannels.count > 1 {
+                selectedChannels.remove(channel)
+            } else {
+                // Ideally we would show a tooltip here, but for now we just prevent the change.
+                // The toggle binding in UI will just reflect the state back to true.
+                 print("⚠️ Cannot disable the last channel.")
+            }
         } else {
             selectedChannels.insert(channel)
         }
@@ -837,8 +854,7 @@ struct SettingsView: View {
                     .opacity(0.5)
                 
                 SettingsToggleRow(
-                    title: "Fit on vertical displays",
-                    description: "Shows full image with background fill",
+                    title: "Prevent cropping on vertical screens",
                     isOn: $manager.fitVerticalDisplays
                 )
             }

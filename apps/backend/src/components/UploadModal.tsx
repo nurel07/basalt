@@ -230,29 +230,37 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
     const handleUpload = async (file: File) => {
         setIsUploading(true);
         try {
-            const signRes = await fetch("/api/cloudinary/sign", { method: "POST" });
-            if (!signRes.ok) throw new Error("Failed to get upload signature");
-            const { signature, timestamp, cloudName, apiKey } = await signRes.json();
+            // 1. Get Direct Upload URL from Server
+            const signRes = await fetch("/api/cloudflare/upload", { method: "POST" });
+            if (!signRes.ok) throw new Error("Failed to get upload URL");
+            const { uploadUrl, id } = await signRes.json();
 
+            // 2. Upload File to Cloudflare
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("api_key", apiKey);
-            formData.append("timestamp", timestamp.toString());
-            formData.append("signature", signature);
-            formData.append("folder", "wallpapers");
 
-            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            const uploadRes = await fetch(uploadUrl, {
                 method: "POST",
                 body: formData,
             });
 
             if (!uploadRes.ok) {
-                const errorData = await uploadRes.json();
-                throw new Error(errorData.error?.message || "Upload failed");
+                throw new Error("Cloudflare upload failed");
             }
 
             const data = await uploadRes.json();
-            setUploadedUrl(data.secure_url);
+
+            // 3. Construct Public URL
+            // Cloudflare Images format: https://imagedelivery.net/<ACCOUNT_HASH>/<IMAGE_ID>/<VARIANT>
+            // We need the Account Hash... but usually the result contains the full URL or we construct it.
+            // Actually, for simplicity let's assume 'public' variant.
+            // But wait, we don't know the Account Hash on the client easily unless we pass it down.
+            // However, the `result.variants` array usually has the full URLs.
+
+            // data.result.variants is array of strings
+            const publicUrl = data.result.variants.find((v: string) => v.endsWith("/public")) || data.result.variants[0];
+
+            setUploadedUrl(publicUrl);
         } catch (error: any) {
             console.error("Upload error:", error);
             alert(`Upload failed: ${error.message}`);
