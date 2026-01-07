@@ -26,6 +26,12 @@ export async function analyzeImage(imageUrl: string) {
             // Match the Admin Grid transformation to reuse cache/transformations
             // Grid uses: w_1200,q_auto,f_auto (from src/lib/cloudinary.ts)
             fetchUrl = imageUrl.replace("/upload/", "/upload/w_1200,q_auto,f_auto/");
+        } else if (imageUrl.includes("imagedelivery.net")) {
+            // Cloudflare Images optimization
+            // If the URL is pointing to the 'full' variant, swap it for 'public' (1366px)
+            // This allows the AI to analyze a smaller, faster loading image while preserving the full res for users.
+            // URL format: https://imagedelivery.net/<HASH>/<ID>/<VARIANT>
+            fetchUrl = imageUrl.replace("/full", "/public");
         }
 
         const response = await fetch(fetchUrl);

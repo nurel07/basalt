@@ -121,7 +121,7 @@ struct QuickStartView: View {
             .padding(.bottom, 30)
         }
         .frame(width: 522, height: 580)
-        .background(Color.white)
+        .background(Color(NSColor.windowBackgroundColor))
         .onDisappear {
             SharedVideoManager.shared.hardReset()
         }

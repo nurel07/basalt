@@ -251,16 +251,20 @@ export default function UploadModal({ isOpen, onClose, file, previewUrl, wallpap
             const data = await uploadRes.json();
 
             // 3. Construct Public URL
-            // Cloudflare Images format: https://imagedelivery.net/<ACCOUNT_HASH>/<IMAGE_ID>/<VARIANT>
-            // We need the Account Hash... but usually the result contains the full URL or we construct it.
-            // Actually, for simplicity let's assume 'public' variant.
-            // But wait, we don't know the Account Hash on the client easily unless we pass it down.
-            // However, the `result.variants` array usually has the full URLs.
+            // Cloudflare Images returns variants in the response.
+            // We want to save the 'full' (high-res) variant to the database for the apps to use.
+            // The AI and Admin Grid will swap this for 'public' (low-res) dynamically.
 
-            // data.result.variants is array of strings
-            const publicUrl = data.result.variants.find((v: string) => v.endsWith("/public")) || data.result.variants[0];
+            // data.result.variants is array of strings: [ "https://.../public", "https://.../full" ]
+            const variants = data.result.variants as string[];
+            const fullUrl = variants.find(v => v.endsWith("/full"));
+            const publicUrl = variants.find(v => v.endsWith("/public"));
 
-            setUploadedUrl(publicUrl);
+            // Default to 'full', fallback to 'public', fallback to first available
+            // This ensures users get the 4K version, while we use the smaller public version for AI/Grid.
+            const finalUrl = fullUrl || publicUrl || variants[0];
+
+            setUploadedUrl(finalUrl);
         } catch (error: any) {
             console.error("Upload error:", error);
             alert(`Upload failed: ${error.message}`);
