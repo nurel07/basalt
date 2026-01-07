@@ -62,3 +62,32 @@ export async function PUT(
         );
     }
 }
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const id = (await params).id;
+
+        await prisma.$transaction(async (tx) => {
+            // Delete all wallpapers in this collection first
+            await tx.wallpaper.deleteMany({
+                where: { collectionId: id },
+            });
+
+            // Then delete the collection
+            await tx.mobileCollection.delete({
+                where: { id },
+            });
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting collection:", error);
+        return NextResponse.json(
+            { error: "Error deleting collection" },
+            { status: 500 }
+        );
+    }
+}

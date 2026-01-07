@@ -126,6 +126,25 @@ export default function CollectionDetailClient({ collection, wallpapers }: Colle
                             >
                                 ✏️
                             </button>
+                            <button
+                                onClick={async () => {
+                                    if (!confirm(`Are you sure you want to delete "${collection.name}"? This will permanently delete the collection and ALL ${items.length} wallpapers inside it.`)) return;
+
+                                    const res = await fetch(`/api/collections/${collection.id}`, {
+                                        method: "DELETE",
+                                    });
+
+                                    if (res.ok) {
+                                        window.location.href = "/admin";
+                                    } else {
+                                        alert("Failed to delete collection");
+                                    }
+                                }}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Delete Collection"
+                            >
+                                🗑️
+                            </button>
                         </div>
                         <p className="text-gray-500">Collection Gallery</p>
                     </div>
