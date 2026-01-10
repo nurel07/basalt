@@ -13,6 +13,7 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
     const [slug, setSlug] = useState("");
     const [description, setDescription] = useState("");
 
+    const [channel, setChannel] = useState("HUMAN");
 
     // Track if user manually edited slug to avoid auto-generating it on name change if they customized it
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
@@ -29,11 +30,13 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
                 setName(initialData.name);
                 setSlug(initialData.slug);
                 setDescription(initialData.description || "");
+                setChannel(initialData.channel || "HUMAN");
                 setIsSlugManuallyEdited(true); // Don't auto-update slug when editing existing
             } else {
                 setName("");
                 setSlug("");
                 setDescription("");
+                setChannel("HUMAN");
                 setIsSlugManuallyEdited(false);
             }
         }
@@ -72,14 +75,14 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
                 // Best approach: Send initialData.coverImage.
                 res = await fetch(`/api/collections/${initialData.id}`, {
                     method: "PUT",
-                    body: JSON.stringify({ name, slug, description, coverImage: initialData.coverImage }),
+                    body: JSON.stringify({ name, slug, description, channel, coverImage: initialData.coverImage }),
                 });
             } else {
                 // CREATE - Use a placeholder
                 const PLACEHOLDER_COVER = "https://placehold.co/600x800/222222/FFFFFF/png?text=Collection";
                 res = await fetch("/api/collections", {
                     method: "POST",
-                    body: JSON.stringify({ name, slug, description, coverImage: PLACEHOLDER_COVER }),
+                    body: JSON.stringify({ name, slug, description, channel, coverImage: PLACEHOLDER_COVER }),
                 });
             }
 
@@ -140,6 +143,34 @@ export default function CreateCollectionModal({ isOpen, onClose, initialData }: 
                             className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 outline-none focus:ring-2 focus:ring-blue-500"
                             rows={3}
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1 dark:text-gray-300">Channel</label>
+                        <div className="flex gap-4 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="collection-channel"
+                                    value="HUMAN"
+                                    checked={channel === "HUMAN"}
+                                    onChange={(e) => setChannel(e.target.value)}
+                                    className="w-4 h-4 text-blue-600"
+                                />
+                                <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">Human</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="collection-channel"
+                                    value="AI"
+                                    checked={channel === "AI"}
+                                    onChange={(e) => setChannel(e.target.value)}
+                                    className="w-4 h-4 text-purple-600"
+                                />
+                                <span className="text-purple-600 dark:text-purple-300 text-sm font-medium">AI Generated</span>
+                            </label>
+                        </div>
                     </div>
 
 

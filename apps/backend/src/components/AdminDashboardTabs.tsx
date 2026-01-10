@@ -8,7 +8,7 @@ import UploadCell from "./UploadCell";
 import UploadModal, { Wallpaper } from "./UploadModal";
 
 
-import CreateCollectionModal from "./CreateCollectionModal";
+import CollectionList from "./CollectionList";
 import { MobileCollection } from "./UploadModal";
 
 interface AdminDashboardTabsProps {
@@ -30,9 +30,6 @@ export default function AdminDashboardTabs({
     const [activeWallpaper, setActiveWallpaper] = useState<Wallpaper | undefined>(undefined);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<"UPLOAD" | "RESCHEDULE" | "EDIT">("UPLOAD");
-
-    // New Collection Modal State
-    const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
 
     const filterWallpapers = (list: Wallpaper[]) => {
         if (channelFilter === "ALL") return list;
@@ -135,35 +132,7 @@ export default function AdminDashboardTabs({
             {/* Content */}
             <div className="min-h-[500px]">
                 {area === "MOBILE" ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {/* Create Collection Card */}
-                        <div
-                            onClick={() => setIsCollectionModalOpen(true)}
-                            className="aspect-[4/3] bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:border-pink-500 hover:text-pink-600 transition-colors group"
-                        >
-                            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">➕</span>
-                            <span className="font-semibold">New Collection</span>
-                        </div>
-
-                        {collections.map(collection => (
-                            <Link href={`/admin/collections/${collection.id}`} key={collection.id} className="aspect-[4/3] bg-gray-200 rounded-xl relative overflow-hidden group cursor-pointer hover:shadow-lg transition-all block">
-                                {/* Only Name for now since we don't have Cover Image in the minimal type yet */}
-                                {collection.coverImage && (
-                                    <img src={collection.coverImage} className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105" />
-                                )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4">
-                                    <h3 className="text-white font-bold text-lg">{collection.name}</h3>
-                                </div>
-                            </Link>
-                        ))}
-
-                        {/* Only show UploadCell if in Mobile Mode to add to collections? 
-                            Actually, UploadCell is for adding wallpapers. 
-                            If we are in "Collections View", we click a collection to see wallpapers. 
-                            For now, let's keep UploadCell available but strictly for "Mobile" Type uploads if needed. 
-                            But maybe hide it here?
-                        */}
-                    </div>
+                    <CollectionList initialCollections={collections} />
                 ) : activeTab === "future" ? (
                     <MasonryGrid gap="gap-0 space-y-0">
                         {/* Upload Trigger always visible in Future? Or both? Usually convenient in Future/Active tab */}
@@ -211,11 +180,6 @@ export default function AdminDashboardTabs({
                 file={null}
                 previewUrl=""
                 collections={collections}
-            />
-            {/* Collection Creation Modal */}
-            <CreateCollectionModal
-                isOpen={isCollectionModalOpen}
-                onClose={() => setIsCollectionModalOpen(false)}
             />
         </div>
     );

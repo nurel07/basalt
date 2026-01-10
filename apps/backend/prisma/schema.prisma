@@ -51,5 +51,8 @@ model MobileCollection {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   
+  channel     String      @default("HUMAN") // "HUMAN" or "AI"
+  order       Int         @default(0)
+  
   wallpapers  Wallpaper[]
 }

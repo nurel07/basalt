@@ -9,7 +9,10 @@ export async function GET(request: Request) {
                     select: { wallpapers: true },
                 },
             },
-            orderBy: { name: "asc" },
+            orderBy: [
+                { order: "asc" },
+                { name: "asc" },
+            ],
         });
 
         // Add count to the response explicitly if needed or use client side
@@ -26,7 +29,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, slug, description, coverImage } = body;
+        const { name, slug, description, coverImage, channel } = body;
 
         if (!name || !slug || !coverImage) {
             return NextResponse.json(
@@ -41,6 +44,7 @@ export async function POST(request: Request) {
                 slug,
                 description,
                 coverImage,
+                channel: channel || "HUMAN",
                 isPublished: true, // Default to published for now
             },
         });

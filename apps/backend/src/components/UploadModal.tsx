@@ -26,6 +26,8 @@ export interface MobileCollection {
     slug: string;
     description?: string | null;
     coverImage?: string;
+    channel?: string; // "HUMAN" | "AI"
+    order?: number;
 }
 
 interface UploadModalProps {
