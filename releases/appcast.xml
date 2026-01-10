@@ -8,7 +8,7 @@
             <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.6</sparkle:minimumSystemVersion>
-            <enclosure url="https://basalt.yevgenglukhov.com/Basalt.zip" length="11280021" type="application/octet-stream" sparkle:edSignature="CCygmF9dEgXUuPIv9sn20e7Jpg0HbGlIstHEslvFLrJKX/mz3fRBagBgFhZ7hbJpMJ+aD0Ef4loxS09oVqQCBA=="/>
+            <enclosure url="https://basalt.yevgenglukhov.com/Basalt.zip" length="11277093" type="application/octet-stream" sparkle:edSignature="b9yhGS1aS6aeB2LYuxf/IXm3BCfR+9l2EMVQxU3xmfAgFVCVfYlmz8Qbz4nbO5GzOFUDc7YQ9WtFqf70DG3qBw=="/>
         </item>
         <item>
             <title>1.0.2</title>
