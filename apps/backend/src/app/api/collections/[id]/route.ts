@@ -41,7 +41,7 @@ export async function PUT(
     try {
         const id = (await params).id;
         const body = await request.json();
-        const { name, slug, description, coverImage } = body;
+        const { name, slug, description, coverImage, channel } = body;
 
         const updatedCollection = await prisma.mobileCollection.update({
             where: { id },
@@ -50,6 +50,7 @@ export async function PUT(
                 slug,
                 description,
                 coverImage,
+                channel,
             },
         });
 
