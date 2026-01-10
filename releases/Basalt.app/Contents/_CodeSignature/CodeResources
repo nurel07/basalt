@@ -10,23 +10,39 @@
 		</data>
 		<key>Resources/Assets.car</key>
 		<data>
-		+iqjv/Hs+El4BVd311+yKWTg1N0=
+		1Wzk6gc3sxvUD9XxoHeeGWnyFtM=
 		</data>
 		<key>Resources/basalt.code-workspace</key>
 		<data>
 		7N2S0ydPYkCAfClv7RYpBrM2+FQ=
 		</data>
+		<key>Resources/quickstart-01-fallback.jpg</key>
+		<data>
+		hf7e9e4wP89vJvXXGOPIk61WPwU=
+		</data>
 		<key>Resources/quickstart-01.mp4</key>
 		<data>
 		PxYrleBWLu3Rh4pr4+WA8jBzCwM=
+		</data>
+		<key>Resources/quickstart-02-fallback.jpg</key>
+		<data>
+		TsLthB5DILRPF41NqGl5PM0lrT0=
 		</data>
 		<key>Resources/quickstart-02.mp4</key>
 		<data>
 		adj4mlCVEGJRFimxe89QCJUeCl4=
 		</data>
+		<key>Resources/quickstart-03-fallback.jpg</key>
+		<data>
+		OdNVPj7oswuk9hKf9fV3+iuyo8U=
+		</data>
 		<key>Resources/quickstart-03.mp4</key>
 		<data>
 		Zzc21ej+Cq4vHPTRflxI7DFB1Xg=
+		</data>
+		<key>Resources/quickstart-04-fallback.jpg</key>
+		<data>
+		jfCW+png0PMAYE3mpjVx9TPyFM8=
 		</data>
 		<key>Resources/quickstart-04.mp4</key>
 		<data>
@@ -39,10 +55,10 @@
 		<dict>
 			<key>cdhash</key>
 			<data>
-			UAEozCAfymmnXyIzObwDbliQ7fw=
+			Gqb3C6a0ehfSOCnfJkWDuPtGfhw=
 			</data>
 			<key>requirement</key>
-			<string>anchor apple generic and identifier "org.sparkle-project.Sparkle" and (certificate leaf[field.1.2.840.113635.100.6.1.9] /* exists */ or certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = Q583S99HPR)</string>
+			<string>identifier "org.sparkle-project.Sparkle" and anchor apple generic and certificate leaf[subject.CN] = "Apple Distribution: Yevgen Glukhov (Q583S99HPR)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 		</dict>
 		<key>Resources/AppIcon.icns</key>
 		<dict>
@@ -55,7 +71,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			KlBGjQBxB1VJ6TeeaVdhfETwlY7U6LHGq/Xm6ZjAwNU=
+			KF6FUByIrfKfCsNzNcufaXfRyUrfZImtU/l3vi4ZKT8=
 			</data>
 		</dict>
 		<key>Resources/basalt.code-workspace</key>
@@ -65,11 +81,25 @@
 			p0csimqEbKVnqwLV5qooTBPQ7iNY3Z7vV46uAmjrQEg=
 			</data>
 		</dict>
+		<key>Resources/quickstart-01-fallback.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			6ypAxqAr5eBpkBBU5QLmvUkTV0W5Duo2mza3Z/5Nyko=
+			</data>
+		</dict>
 		<key>Resources/quickstart-01.mp4</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			0bq55BXU8IRjn8+7XpUGuFxwL/wjsorQs3IswXA9+mg=
+			</data>
+		</dict>
+		<key>Resources/quickstart-02-fallback.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			i2w3dQgZUktgTsqaRICXLlLYyabCMOHF+Ro3ThmBOME=
 			</data>
 		</dict>
 		<key>Resources/quickstart-02.mp4</key>
@@ -79,11 +109,25 @@
 			f1d3T7nTDCqqXq85+I/OkkmIt3qZp3+Zj8UH1kXQjKM=
 			</data>
 		</dict>
+		<key>Resources/quickstart-03-fallback.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			CuBzMcQBhhLf5t2EwvNyuJB30aiGuFe9o8kMfsjkHHg=
+			</data>
+		</dict>
 		<key>Resources/quickstart-03.mp4</key>
 		<dict>
 			<key>hash2</key>
 			<data>
 			ftCYw7kD5mSHBfFk3mkOJJJgrUQA/rcyPv9BYuAb5xc=
+			</data>
+		</dict>
+		<key>Resources/quickstart-04-fallback.jpg</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			dv4MS+ZdPzWXUdI4cnPcMkKxNqjXO6GSP2Q9xxGo2eQ=
 			</data>
 		</dict>
 		<key>Resources/quickstart-04.mp4</key>
