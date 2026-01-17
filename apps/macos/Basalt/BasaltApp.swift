@@ -30,7 +30,6 @@ enum Constants {
     static let dailyStateKey = "DailyState"
     
     // Channels
-    // Channels
     static let channelHuman = "HUMAN"
     static let channelAI = "AI"
     static let defaultChannels = [channelHuman, channelAI]
@@ -203,6 +202,19 @@ struct ImageService {
         return injectCloudinaryParams(url: wallpaper.url, width: width, height: height, text: overlayText, showText: showText, fitToVertical: fitToVertical)
     }
     
+    /// Helper to get the text string for local processing
+    func getOverlayText(for wallpaper: Wallpaper) -> String? {
+        // AI = No text
+        if wallpaper.channel == Constants.channelAI { return nil }
+        
+        var textParts: [String] = []
+        if let name = wallpaper.name, !name.isEmpty { textParts.append(name) }
+        if let artist = wallpaper.artist, !artist.isEmpty { textParts.append(artist) }
+        if let date = wallpaper.creationDate, !date.isEmpty { textParts.append(date) }
+        
+        return textParts.isEmpty ? nil : textParts.joined(separator: ", ")
+    }
+    
     private func injectCloudinaryParams(url: String, width: Int, height: Int, text: String, showText: Bool, fitToVertical: Bool) -> URL? {
         // 0. Cloudflare / Non-Cloudinary Passthrough
         // If it's NOT a cloudinary URL, we just return it as is.
@@ -241,13 +253,12 @@ struct ImageService {
             resize = "w_\(width),h_\(height),c_fill,f_jpg"
         }
         
-        let icon = "l_topbar-icon-white_cwox5b,w_16,h_16,g_south_west,x_8,y_8"
-        let textMain = "l_text:Arial_14:\(encodedText),co_white,g_south_west,x_34,y_9"
+        // Local Overlay Transition:
+        // We now handle text/overlays locally for consistency.
+        // So we ONLY ask Cloudinary to Resize/Crop.
         
-        var params = "\(resize)/\(icon)/"
-        if showText {
-            params += "\(textMain)/"
-        }
+        let params = "\(resize)/"
+        // Removed: icon & textMain injection
         
         var newUrlString = url
         newUrlString.insert(contentsOf: params, at: range.upperBound)
@@ -315,6 +326,236 @@ struct ImageService {
         let workspace = NSWorkspace.shared
         try workspace.setDesktopImageURL(localUrl, for: screen, options: [:])
     }
+    
+    /// Checks if the image needs local padding (vertical fit) OR text overlay and generates it if so.
+    /// Returns the new URL or the original if no processing needed.
+    @MainActor
+    func processImageForScreen(sourceUrl: URL, screen: NSScreen, fitVertical: Bool, originalUrlString: String, overlayText: String?) throws -> URL {
+        // 1. Determine Needs
+        
+        // A. Padding Criteria
+        let screenWidth = screen.frame.width
+        let screenHeight = screen.frame.height
+        let isVerticalScreen = screenHeight > screenWidth
+        // Only pad if it's a vertical screen AND user wants it AND Cloudinary didn't already do it
+        let needsPadding = fitVertical && isVerticalScreen && !originalUrlString.contains("c_pad")
+        
+        // B. Text Criteria
+        // Always apply if text exists (since we removed server-side injection)
+        let needsText = (overlayText != nil)
+        
+        // If nothing to do, return original
+        if !needsPadding && !needsText { return sourceUrl }
+        
+        // 2. Load Source
+        guard let sourceImage = NSImage(contentsOf: sourceUrl) else {
+            return sourceUrl // Fail safe
+        }
+        
+        let srcSize = sourceImage.size
+        
+        // 3. Setup Target Canvas (Smart Resolution)
+        // Use min(screen pixels, source pixels) to:
+        // - Never upscale beyond source resolution (wastes space)
+        // - Still fit the screen when source is larger
+        let scale = screen.backingScaleFactor
+        let screenPixelWidth = Int(screenWidth * scale)
+        let screenPixelHeight = Int(screenHeight * scale)
+        
+        // Calculate target maintaining aspect ratio, capped to source size
+        let sourceWidth = Int(srcSize.width)
+        let sourceHeight = Int(srcSize.height)
+        
+        // For "fill" mode, we need screen dimensions (we'll crop excess)
+        // For "pad" mode, we also use screen dimensions (source fits inside)
+        // But we cap to source size to avoid pointless upscaling
+        let pixelWidth = min(screenPixelWidth, sourceWidth)
+        let pixelHeight = min(screenPixelHeight, sourceHeight)
+        let targetSize = NSSize(width: pixelWidth, height: pixelHeight)
+        
+        // Output Filename (Hash based on params to cache it)
+        // Include "v8" for Resolution Optimization
+        let fileSuffix = "_\(needsPadding ? "pad" : "fill")\(needsText ? "txt" : "")_v8"
+        let newFilename = "processed_\(sourceUrl.deletingPathExtension().lastPathComponent)\(fileSuffix).jpg"
+        let folderURL = sourceUrl.deletingLastPathComponent()
+        let destUrl = folderURL.appendingPathComponent(newFilename)
+        
+        // Cache Check
+        if fileManager.fileExists(atPath: destUrl.path) {
+            return destUrl
+        }
+        
+        // 4. Draw
+        let newImage = NSImage(size: targetSize)
+        newImage.lockFocus()
+        
+        let widthRatio = targetSize.width / srcSize.width
+        let heightRatio = targetSize.height / srcSize.height
+        
+        // A. Background & Image Placement
+        if needsPadding {
+            // Dark Background
+            let color = NSColor(red: 28/255, green: 28/255, blue: 30/255, alpha: 1.0).cgColor
+            let ctx = NSGraphicsContext.current?.cgContext
+            ctx?.setFillColor(color)
+            ctx?.fill(CGRect(x: 0, y: 0, width: targetSize.width, height: targetSize.height))
+            
+            // Aspect FIT (min scale)
+            let fitScale = min(widthRatio, heightRatio)
+            
+            let drawnWidth = srcSize.width * fitScale
+            let drawnHeight = srcSize.height * fitScale
+            let x = (targetSize.width - drawnWidth) / 2
+            let y = (targetSize.height - drawnHeight) / 2
+            
+            let destRect = NSRect(x: x, y: y, width: drawnWidth, height: drawnHeight)
+            NSGraphicsContext.current?.imageInterpolation = .high
+            sourceImage.draw(in: destRect, from: .zero, operation: .sourceOver, fraction: 1.0)
+            
+        } else {
+            // Aspect FILL (max scale)
+            let fillScale = max(widthRatio, heightRatio)
+            
+            let drawnWidth = srcSize.width * fillScale
+            let drawnHeight = srcSize.height * fillScale
+            
+            // Center Crop
+            let x = (targetSize.width - drawnWidth) / 2
+            let y = (targetSize.height - drawnHeight) / 2
+            
+            let destRect = NSRect(x: x, y: y, width: drawnWidth, height: drawnHeight)
+            NSGraphicsContext.current?.imageInterpolation = .high
+            sourceImage.draw(in: destRect, from: .zero, operation: .sourceOver, fraction: 1.0)
+        }
+        
+        // B. Overlay (Icon + Text)
+        if needsText, let text = overlayText {
+            // 1. Setup Scaling
+            // Use actual output scale relative to screen logical size (not backing scale)
+            // This ensures text looks correct regardless of resolution capping
+            let actualScale = targetSize.width / screenWidth
+            
+            let baseFontSize: CGFloat = 12.0
+            let baseMargin: CGFloat = 22.0
+            let baseIconHeight: CGFloat = 18.0 // Approx 1.5x font
+            let baseSpacing: CGFloat = 8.0
+            
+            let fontSize = baseFontSize * actualScale
+            let margin = baseMargin * actualScale
+            let iconSize = baseIconHeight * actualScale
+            let spacing = baseSpacing * actualScale
+            
+            // 2. Prepare Icon
+            // Try Asset Catalog first ("basalt-icon-white" as requested), then SF Symbol Fallback
+            var iconImage = NSImage(named: "basalt-icon-white")
+            if iconImage == nil {
+                let config = NSImage.SymbolConfiguration(pointSize: fontSize, weight: .medium)
+                iconImage = NSImage(systemSymbolName: "square.stack.3d.down.right.fill", accessibilityDescription: nil)?
+                    .withSymbolConfiguration(config)
+            }
+            
+            // 3. Draw Icon (if valid) with Shadow & Tint
+            if let rawIcon = iconImage {
+                // Determine layout y-position to center vertically with text
+                // Text baseline is usually at 'margin'.
+                // Let's align bottoms roughly or center.
+                // Simple bottom alignment:
+                let iconOrigin = NSPoint(x: margin, y: margin - (2 * actualScale)) // Slight nudge down for optical baseline alignment
+                
+                // Draw Loop for Tint + Shadow
+                let ctx = NSGraphicsContext.current?.cgContext
+                ctx?.saveGState()
+                
+                // Shadow
+                ctx?.setShadow(offset: CGSize(width: 1, height: -1), blur: 2, color: NSColor.black.withAlphaComponent(0.5).cgColor)
+                
+                // Tint to White needs a mask. Safest robust way in Cocoa drawing:
+                // Create a tinted copy or use template rendering logic.
+                // Simpler: Draw image as template using SourceAtop with white fill?
+                // Or just use the native `drawing` methods which respect template mode if set.
+                rawIcon.isTemplate = true
+                NSColor.white.set() // Tint color (Solid White)
+                
+                let iconRect = NSRect(x: iconOrigin.x, y: iconOrigin.y, width: iconSize, height: iconSize)
+                // Draw image into the rect, using the set color. 
+                // Use fraction 0.6 to match text opacity explicitly
+                rawIcon.draw(in: iconRect, from: .zero, operation: .sourceOver, fraction: 0.6, respectFlipped: true, hints: nil)
+                
+                // Explicitly fill the rect for template images to take color?
+                // Actually, `draw` with `isTemplate` usually uses the current color.
+                // Let's ensure by using a standard locking approach if the above is flaky:
+                // But keeping it simple for now. If this fails to be white, we'll brute force it.
+                
+                ctx?.restoreGState()
+            }
+            
+            // 4. Draw Text
+            let textX = margin + iconSize + spacing
+            
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: NSFont.systemFont(ofSize: fontSize, weight: .medium),
+                .foregroundColor: NSColor.white.withAlphaComponent(0.6),
+                .shadow: {
+                    let s = NSShadow()
+                    s.shadowOffset = NSSize(width: 1, height: -1)
+                    s.shadowBlurRadius = 2
+                    s.shadowColor = NSColor.black.withAlphaComponent(0.5)
+                    return s
+                }()
+            ]
+            
+            let attributedString = NSAttributedString(string: text, attributes: attrs)
+            attributedString.draw(at: NSPoint(x: textX, y: margin))
+        }
+        
+        newImage.unlockFocus()
+        
+        // 5. Save to Disk
+        guard let tiffData = newImage.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiffData),
+              let jpgData = bitmap.representation(using: .jpeg, properties: [.compressionFactor: 0.95]) else {
+            return sourceUrl
+        }
+        
+        try jpgData.write(to: destUrl)
+        
+        return destUrl
+    }
+    
+    /// Deletes processed and downloaded wallpapers older than the specified days
+    func cleanupOldFiles(olderThanDays: Int = 3) {
+        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let folderURL = appSupportURL.appendingPathComponent("Basalt")
+        
+        guard fileManager.fileExists(atPath: folderURL.path) else { return }
+        
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -olderThanDays, to: Date()) ?? Date()
+        
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: [.contentModificationDateKey])
+            
+            for fileURL in contents {
+                let filename = fileURL.lastPathComponent
+                
+                // Only clean up our generated files (processed_* and wallpaper_*)
+                guard filename.hasPrefix("processed_") || filename.hasPrefix("wallpaper_") else { continue }
+                
+                // Check modification date
+                if let attrs = try? fileManager.attributesOfItem(atPath: fileURL.path),
+                   let modDate = attrs[.modificationDate] as? Date,
+                   modDate < cutoffDate {
+                    try? fileManager.removeItem(at: fileURL)
+                    #if DEBUG
+                    print("🧹 Cleaned up old file: \(filename)")
+                    #endif
+                }
+            }
+        } catch {
+            #if DEBUG
+            print("⚠️ Cleanup error: \(error.localizedDescription)")
+            #endif
+        }
+    }
 }
 
 // MARK: - 4. Manager (ViewModel)
@@ -364,7 +605,7 @@ class WallpaperManager: ObservableObject {
     }
     
     // Internal Cache
-    var cachedWallpapers: [Wallpaper] = []
+    private var cachedWallpapers: [Wallpaper] = []
     private var screenChangeTimer: Timer?
     
     // Concurrency Control
@@ -382,6 +623,9 @@ class WallpaperManager: ObservableObject {
         UserDefaults.standard.removeObject(forKey: Constants.overrideContextIdKey)
         UserDefaults.standard.removeObject(forKey: Constants.overrideWallpaperIdKey)
         UserDefaults.standard.removeObject(forKey: Constants.overrideWallpaperKey)
+        
+        // Cleanup old wallpaper files (older than 3 days) to prevent disk bloat
+        ImageService().cleanupOldFiles()
         
         // Init State
         self.useSameWallpaper = UserDefaults.standard.object(forKey: Constants.useSameWallpaperKey) as? Bool ?? true
@@ -407,6 +651,10 @@ class WallpaperManager: ObservableObject {
         // Screen Change
         NotificationCenter.default.addObserver(
             self, selector: #selector(handleScreenChange), name: NSApplication.didChangeScreenParametersNotification, object: nil
+        )
+        // Day Change (Midnight) - System sends this at midnight or when waking on a new day
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(handleDayChange), name: .NSCalendarDayChanged, object: nil
         )
         // Network Change
         networkMonitor.$isConnected
@@ -435,7 +683,9 @@ class WallpaperManager: ObservableObject {
             } else {
                 // Ideally we would show a tooltip here, but for now we just prevent the change.
                 // The toggle binding in UI will just reflect the state back to true.
+                #if DEBUG
                  print("⚠️ Cannot disable the last channel.")
+                #endif
             }
         } else {
             selectedChannels.insert(channel)
@@ -447,6 +697,8 @@ class WallpaperManager: ObservableObject {
         defaults.removeObject(forKey: Constants.overrideContextIdKey)
         defaults.removeObject(forKey: Constants.overrideWallpaperIdKey)
         defaults.removeObject(forKey: Constants.overrideWallpaperKey)
+        // FORCE CLEAN REFRESH: Clear the daily cache too so we re-fetch the manifest
+        defaults.removeObject(forKey: Constants.dailyStateKey)
         checkForUpdates()
     }
     
@@ -673,12 +925,23 @@ class WallpaperManager: ObservableObject {
                     group.addTask {
                         do {
                             let localPath = try await self.imageService.downloadImage(url: downloadUrl, wallpaperId: wallpaper.id)
+                            
+                            // NEW: Local Processing Step (Fit to Vertical + Text Overlay)
+                            // We do this Post-Download to support any provider (Cloudflare, etc)
+                            let processedPath = try await self.imageService.processImageForScreen(
+                                sourceUrl: localPath,
+                                screen: screen,
+                                fitVertical: self.fitVerticalDisplays,
+                                originalUrlString: wallpaper.url,
+                                overlayText: self.imageService.getOverlayText(for: wallpaper)
+                            )
+                            
                             try await MainActor.run {
-                                try self.imageService.applyToScreen(localUrl: localPath, screen: screen)
+                                try self.imageService.applyToScreen(localUrl: processedPath, screen: screen)
                                 
                                 // Sync Screensaver if this is the first/main screen and enabled
                                 if index == 0 && self.screensaverEnabled {
-                                    self.syncToScreensaver(sourceUrl: localPath)
+                                    self.syncToScreensaver(sourceUrl: processedPath)
                                 }
                             }
                             return (index, info, nil)
@@ -725,26 +988,52 @@ class WallpaperManager: ObservableObject {
     // MARK: - Event Handlers
     
     @objc func handleWake() {
-        // print("System Wake. Scheduling robust checks...")
+        // Check if we woke up on a new day - if so, clear stale state immediately
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayString = formatter.string(from: Date())
+        
+        if let data = defaults.data(forKey: Constants.dailyStateKey),
+           let savedState = try? JSONDecoder().decode(DailyState.self, from: data),
+           savedState.date != todayString {
+            // It's a new day! Clear the stale state so checkForUpdates fetches fresh data
+            #if DEBUG
+            print("🌅 Wake on new day (was: \(savedState.date), now: \(todayString)). Clearing stale state...")
+            #endif
+            defaults.removeObject(forKey: Constants.dailyStateKey)
+        }
         
         // Strategy: Network might take a while to reconnect (DHCP, etc).
-        // specific times to catch "fast" vs "slow" reconnections.
+        // Multiple checks at specific times to catch "fast" vs "slow" reconnections.
         
         // 1. Quick check (5s)
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
-            // print("Wake Check 1 (5s)")
             Task { @MainActor [weak self] in self?.checkForUpdates() }
         }
         
         // 2. Backup check (15s)
         DispatchQueue.main.asyncAfter(deadline: .now() + 15.0) { [weak self] in
-            // print("Wake Check 2 (15s)")
             Task { @MainActor [weak self] in self?.checkForUpdates() }
         }
         
         // 3. Final safety check (30s)
         DispatchQueue.main.asyncAfter(deadline: .now() + 30.0) { [weak self] in
-            // print("Wake Check 3 (30s)")
+            Task { @MainActor [weak self] in self?.checkForUpdates() }
+        }
+    }
+    
+    @objc func handleDayChange() {
+        // System notification sent at midnight OR when waking up on a new day
+        #if DEBUG
+        print("📅 Day changed. Triggering wallpaper refresh...")
+        #endif
+        
+        // Clear stale daily state to force a fresh fetch
+        defaults.removeObject(forKey: Constants.dailyStateKey)
+        
+        // Immediate check + delayed check (in case network needs time)
+        checkForUpdates()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) { [weak self] in
             Task { @MainActor [weak self] in self?.checkForUpdates() }
         }
     }
