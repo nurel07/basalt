@@ -32,7 +32,7 @@
 		537DD2242ED228500017D58D /* BasaltTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasaltTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		537DD22E2ED228500017D58D /* BasaltUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasaltUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		539F644C2F0AE58300B73235 /* Basalt copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Basalt copy-Info.plist"; path = "/Users/yevgenglukhov/Documents/Yevgen/2 Areas/Code Workspace/basalt/apps/macos/Basalt copy-Info.plist"; sourceTree = "<absolute>"; };
-		539F64572F0AE5ED00B73235 /* Basalt App Store.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Basalt App Store.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		539F64572F0AE5ED00B73235 /* Basalt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Basalt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		539F64592F0AE5ED00B73235 /* Basalt copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Basalt copy2-Info.plist"; path = "/Users/yevgenglukhov/Documents/Yevgen/2 Areas/Code Workspace/basalt/apps/macos/Basalt copy2-Info.plist"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -44,16 +44,12 @@
 			);
 			target = 537DD2162ED2284E0017D58D /* Basalt */;
 		};
-		539F64582F0AE5ED00B73235 /* Exceptions for "Basalt" folder in "Basalt App Store" target */ = {
+		539F64582F0AE5ED00B73235 /* Exceptions for "Basalt" folder in "Basalt MAS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				"Resources/quickstart-01.mp4",
-				"Resources/quickstart-02.mp4",
-				"Resources/quickstart-03.mp4",
-				"Resources/quickstart-04.mp4",
 			);
-			target = 539F644D2F0AE5ED00B73235 /* Basalt App Store */;
+			target = 539F644D2F0AE5ED00B73235 /* Basalt MAS */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -62,7 +58,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				539217FC2F0963FC00115453 /* Exceptions for "Basalt" folder in "Basalt" target */,
-				539F64582F0AE5ED00B73235 /* Exceptions for "Basalt" folder in "Basalt App Store" target */,
+				539F64582F0AE5ED00B73235 /* Exceptions for "Basalt" folder in "Basalt MAS" target */,
 			);
 			path = Basalt;
 			sourceTree = "<group>";
@@ -130,7 +126,7 @@
 				537DD2172ED2284E0017D58D /* Basalt.app */,
 				537DD2242ED228500017D58D /* BasaltTests.xctest */,
 				537DD22E2ED228500017D58D /* BasaltUITests.xctest */,
-				539F64572F0AE5ED00B73235 /* Basalt App Store.app */,
+				539F64572F0AE5ED00B73235 /* Basalt.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -207,9 +203,9 @@
 			productReference = 537DD22E2ED228500017D58D /* BasaltUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		539F644D2F0AE5ED00B73235 /* Basalt App Store */ = {
+		539F644D2F0AE5ED00B73235 /* Basalt MAS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 539F64542F0AE5ED00B73235 /* Build configuration list for PBXNativeTarget "Basalt App Store" */;
+			buildConfigurationList = 539F64542F0AE5ED00B73235 /* Build configuration list for PBXNativeTarget "Basalt MAS" */;
 			buildPhases = (
 				539F64502F0AE5ED00B73235 /* Sources */,
 				539F64512F0AE5ED00B73235 /* Frameworks */,
@@ -222,11 +218,11 @@
 			fileSystemSynchronizedGroups = (
 				537DD2192ED2284E0017D58D /* Basalt */,
 			);
-			name = "Basalt App Store";
+			name = "Basalt MAS";
 			packageProductDependencies = (
 			);
 			productName = Basalt;
-			productReference = 539F64572F0AE5ED00B73235 /* Basalt App Store.app */;
+			productReference = 539F64572F0AE5ED00B73235 /* Basalt.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -272,7 +268,7 @@
 				537DD2162ED2284E0017D58D /* Basalt */,
 				537DD2232ED228500017D58D /* BasaltTests */,
 				537DD22D2ED228500017D58D /* BasaltUITests */,
-				539F644D2F0AE5ED00B73235 /* Basalt App Store */,
+				539F644D2F0AE5ED00B73235 /* Basalt MAS */,
 			);
 		};
 /* End PBXProject section */
@@ -484,7 +480,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q583S99HPR;
 				ENABLE_APP_SANDBOX = NO;
@@ -512,7 +508,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.Basalt;
 				PRODUCT_NAME = Basalt;
 				REGISTER_APP_GROUPS = YES;
@@ -534,7 +530,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q583S99HPR;
 				ENABLE_APP_SANDBOX = YES;
@@ -562,7 +558,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.Basalt;
 				PRODUCT_NAME = Basalt;
 				REGISTER_APP_GROUPS = YES;
@@ -580,11 +576,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -601,11 +597,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.1;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -621,10 +617,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -640,10 +636,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 5;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -660,11 +656,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Basalt/Basalt.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q583S99HPR;
 				ENABLE_APP_SANDBOX = NO;
@@ -692,9 +689,9 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.Basalt;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Basalt;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -710,11 +707,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Basalt/Basalt.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 6;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = Q583S99HPR;
 				ENABLE_APP_SANDBOX = YES;
@@ -742,9 +740,9 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.Basalt;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Basalt;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -794,7 +792,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		539F64542F0AE5ED00B73235 /* Build configuration list for PBXNativeTarget "Basalt App Store" */ = {
+		539F64542F0AE5ED00B73235 /* Build configuration list for PBXNativeTarget "Basalt MAS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				539F64552F0AE5ED00B73235 /* Debug */,

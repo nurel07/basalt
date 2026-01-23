@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "apps/mobile",
+			"name": "Mobile (Flutter)"
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#0c2461",
+			"titleBar.activeBackground": "#0c2461",
+			"titleBar.activeForeground": "#ffffff"
+		}
+	}
+}

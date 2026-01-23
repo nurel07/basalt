@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "apps/backend",
+			"name": "Backend (Next.js)"
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#1e3799",
+			"titleBar.activeBackground": "#1e3799",
+			"titleBar.activeForeground": "#ffffff"
+		}
+	}
+}

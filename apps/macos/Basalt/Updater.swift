@@ -37,7 +37,9 @@ final class Updater: NSObject, ObservableObject {
         #if canImport(Sparkle)
         controller?.updater.checkForUpdates()
         #else
+        #if DEBUG
         print("Update check ignored: Sparkle not available (likely MAS build).")
+        #endif
         #endif
     }
     

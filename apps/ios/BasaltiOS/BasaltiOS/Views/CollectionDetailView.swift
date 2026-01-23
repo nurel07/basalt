@@ -1,63 +1,67 @@
 import SwiftUI
 
 struct CollectionDetailView: View {
-    let collectionId: String
+    let initialCollection: Collection
     @State private var collection: Collection?
+    @State private var infiniteWallpapers: [InfiniteWallpaper] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var scrolledWallpaperID: UUID?
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
         GeometryReader { geo in
-            ZStack {
-                Color.black.ignoresSafeArea()
-                
+            Group {
                 if isLoading {
                     ProgressView()
                         .controlSize(.large)
+                        .tint(.basaltTextPrimary)
                 } else if let errorMessage = errorMessage {
-                     VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 48))
-                            .foregroundColor(.orange)
-                        Text(errorMessage)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.white)
-                        Button("Retry") {
-                            loadData()
+                    ZStack {
+                        Color.basaltBackgroundPrimary.ignoresSafeArea()
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 48))
+                                .foregroundColor(.orange)
+                            Text(errorMessage)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.basaltTextPrimary)
+                            Button("Retry") {
+                                loadData()
+                            }
+                            .buttonStyle(.borderedProminent)
                         }
-                        .buttonStyle(.borderedProminent)
                     }
-                } else if let wallpapers = collection?.wallpapers, !wallpapers.isEmpty {
-                    // Filter out cover (order 0 or name contains 'cover') and sort
-                    let displayWallpapers = wallpapers
-                        .filter { $0.collectionOrder > 0 && !($0.name?.lowercased().contains("cover") ?? false) }
-                        .sorted { $0.collectionOrder < $1.collectionOrder }
-                    let infiniteWallpapers = createInfiniteList(from: displayWallpapers)
-                    
-                    if infiniteWallpapers.isEmpty {
-                        Text("No wallpapers to display")
-                            .foregroundColor(.white)
-                    } else {
+                } else if !infiniteWallpapers.isEmpty {
                         ScrollViewReader { proxy in
                             ScrollView {
                                 LazyVStack(spacing: 0) {
                                     ForEach(infiniteWallpapers) { item in
-                                        WallpaperCard(wallpaper: item.wallpaper)
-                                            .frame(width: geo.size.width * 0.9, height: geo.size.height * 0.85)
-                                            .scrollTransition { content, phase in
-                                                content
-                                                    .scaleEffect(phase.isIdentity ? 1.0 : 0.9)
-                                                    .opacity(phase.isIdentity ? 1.0 : 0.8)
-                                            }
-                                            .padding(.vertical, (geo.size.height * 0.01) / 2)
-                                            .id(item.id)
+                                        VStack {
+                                            WallpaperCard(
+                                                wallpaper: item.wallpaper,
+                                                showMetadata: (collection?.channel ?? initialCollection.channel) != "AI"
+                                            )
+                                                .frame(width: geo.size.width * 0.9, height: geo.size.height * 0.9)
+                                                .scrollTransition { content, phase in
+                                                    content
+                                                        .scaleEffect(phase.isIdentity ? 1.0 : 0.9)
+                                                        .opacity(phase.isIdentity ? 1.0 : 0.8)
+                                                }
+                                                .padding(.vertical, (geo.size.height * 0.01) / 2.5)
+                                        }
+                                        .id(item.id)
                                     }
                                 }
                                 .scrollTargetLayout()
                             }
                             .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
-                            .contentMargins(.vertical, (geo.size.height * (1.0 - 0.86)) / 2, for: .scrollContent)
+                            .scrollPosition(id: $scrolledWallpaperID)
+                            .onChange(of: scrolledWallpaperID) { _, _ in
+                                let generator = UIImpactFeedbackGenerator(style: .light)
+                                generator.impactOccurred()
+                            }
+                            .contentMargins(.vertical, (geo.size.height * (1.0 - 0.8)) / 2, for: .scrollContent)
                             .scrollIndicators(.hidden)
                             .onAppear {
                                 if !infiniteWallpapers.isEmpty {
@@ -68,59 +72,103 @@ struct CollectionDetailView: View {
                                 }
                             }
                         }
-                    }
+                        .background(Color.basaltBackgroundPrimary)
                 } else {
-                    Text("No wallpapers found")
-                        .foregroundColor(.white)
+                    ZStack {
+                        Color.basaltBackgroundPrimary.ignoresSafeArea()
+                        Text("No wallpapers found")
+                            .foregroundColor(.basaltTextPrimary)
+                    }
                 }
-                
-                // Back Button Overlay
-                VStack {
+            }
+            .ignoresSafeArea()
+            .overlay(alignment: .top) {
+                // Custom navigation bar with glassEffect
+                ZStack {
+                    // Centered title pill - hugs text
+                    Text(collection?.name ?? initialCollection.name)
+                        .font(.basaltMediumEmphasized) // "Title" -> Medium Emphasized (16, 600)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .basaltGlass()
+                    
+                    // Back button on the left
                     HStack {
                         Button {
                             dismiss()
                         } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "chevron.left")
-                                    .font(.system(size: 16, weight: .semibold))
-                                Text(collection?.name ?? "Collection")
-                                    .font(.system(size: 16, weight: .semibold))
-                            }
+                            Image(systemName: "chevron.left")
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(.thinMaterial)
-                            .clipShape(Capsule())
-                            .overlay(
-                                Capsule()
-                                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                            )
+                            .frame(width: 44, height: 44)
+                            .basaltGlass()
                         }
-                        .padding(.leading, 16)
-                        .padding(.top, 8) // adjust for safe area
-                        
                         Spacer()
                     }
-                    Spacer()
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 0) // Below status bar
             }
         }
+        .navigationBarHidden(true)
         .task {
             loadData()
         }
-        .navigationBarHidden(true)
     }
     
     private func loadData() {
-        isLoading = true
+        // Instant load if data passed
+        if let wallpapers = initialCollection.wallpapers, !wallpapers.isEmpty {
+            prepareData(with: initialCollection)
+            isLoading = false
+            return
+        }
+        
+        // Otherwise load
+        if infiniteWallpapers.isEmpty {
+            isLoading = true
+        }
         errorMessage = nil
         Task {
             do {
-                collection = try await APIService.shared.fetchCollection(id: collectionId)
+                let fetchedCollection = try await APIService.shared.fetchCollection(id: initialCollection.id)
+                prepareData(with: fetchedCollection)
                 isLoading = false
             } catch {
                 isLoading = false
                 errorMessage = "Failed to load: \(error.localizedDescription)"
+            }
+        }
+    }
+    
+    private func prepareData(with col: Collection) {
+        self.collection = col
+        if let wallpapers = col.wallpapers, !wallpapers.isEmpty {
+            let displayWallpapers = wallpapers
+                .filter { $0.collectionOrder > 0 && !($0.name?.lowercased().contains("cover") ?? false) }
+                .sorted { $0.collectionOrder < $1.collectionOrder }
+            
+            // Avoid regenerating infinite list if it's already the same (simple check)
+            if infiniteWallpapers.isEmpty {
+                infiniteWallpapers = createInfiniteList(from: displayWallpapers)
+            }
+            
+            prefetchImages(wallpapers: displayWallpapers, count: 3)
+        }
+    }
+    
+    private func prefetchImages(wallpapers: [Wallpaper], count: Int) {
+        let toPrefetch = wallpapers.prefix(count)
+        for wallpaper in toPrefetch {
+            guard let url = URL(string: CloudflareImageService.displayURL(from: wallpaper.url)) else { continue }
+            // Start loading in background - data gets cached by URLSession
+            Task.detached(priority: .userInitiated) {
+                do {
+                    let (_, _) = try await URLSession.shared.data(from: url)
+                } catch {
+                    // Silently ignore prefetch errors
+                }
             }
         }
     }
@@ -145,14 +193,24 @@ struct InfiniteWallpaper: Identifiable {
 
 struct WallpaperCard: View {
     let wallpaper: Wallpaper
+    var showMetadata: Bool = true
+    @State private var showDownloadPrompt = false
+    @State private var downloadState: DownloadState = .idle
+
+    @State private var dismissTask: DispatchWorkItem?
+    enum DownloadState {
+        case idle
+        case downloading
+        case saved
+        case openImage
+    }
     
     var body: some View {
         GeometryReader { cardGeo in
-            ZStack(alignment: .bottom) {
-                // Image Layer with Parallax
-                // Image Layer with Parallax
+            ZStack {
+                // Image Layer
                 CachedAsyncImage(
-                    url: URL(string: wallpaper.url) ?? URL(fileURLWithPath: ""),
+                    url: URL(string: CloudflareImageService.displayURL(from: wallpaper.url)) ?? URL(fileURLWithPath: ""),
                     targetSize: CGSize(width: cardGeo.size.width, height: cardGeo.size.height * 1.2)
                 ) { phase in
                     switch phase {
@@ -163,7 +221,7 @@ struct WallpaperCard: View {
                         image
                             .resizable()
                             .scaledToFill()
-                            .frame(width: cardGeo.size.width, height: cardGeo.size.height * 1.2) // Extra height for parallax
+                            .frame(width: cardGeo.size.width, height: cardGeo.size.height * 1.2)
                             .visualEffect { content, geometryProxy in
                                 content.offset(y: -geometryProxy.frame(in: .global).minY * 0.25)
                             }
@@ -176,39 +234,178 @@ struct WallpaperCard: View {
                 }
                 .frame(width: cardGeo.size.width, height: cardGeo.size.height)
                 .clipped()
-                
-                // Footer
-                HStack(alignment: .bottom) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(wallpaper.name ?? "Untitled")
-                            .font(.subheadline)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        
-                        if let artist = wallpaper.artist {
-                            Text(artist)
-                                .font(.caption)
-                                .foregroundColor(.white.opacity(0.8))
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    // Download Button
-                    Button {
-                        downloadOriginalImage()
-                    } label: {
-                        Image(systemName: "arrow.down.to.line") // Matches screenshot better
-                            .font(.system(size: 24, weight: .regular)) // Slightly larger, thinner
-                            .foregroundColor(.white)
-                            .padding(8)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                        showDownloadPrompt.toggle()
                     }
                 }
-                .padding(16)
-                .frame(maxWidth: .infinity)
-                .background(Color.black.opacity(0.4))
-                .scrollTransition { content, phase in
-                    content.opacity(phase.isIdentity ? 1.0 : 0.0)
+                
+                
+                
+                // Footer
+                VStack {
+                    Spacer()
+                    HStack(alignment: .center) {
+                        if showMetadata {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(wallpaper.name ?? "Untitled")
+                                    .font(.basaltSmallEmphasized) // "Name" -> Small Emphasized (14, 600) (or maybe medium?)
+                                    // Matches Collections footer style
+                                    .foregroundColor(.white)
+                                
+                                // Subtitle: "Artist, Year" or just "Artist" or just "Year"
+                                let subtitleParts = [wallpaper.artist, wallpaper.creationDate]
+                                    .compactMap { $0 }
+                                    .filter { !$0.isEmpty }
+                                
+                                if !subtitleParts.isEmpty {
+                                    Text(subtitleParts.joined(separator: ", "))
+                                        .font(.basaltCaption) // "Caption" -> Caption (11, 400)? Or Footnote (13)?
+                                        // Original was .font(.caption).
+                                        // Let's use basaltSmall (14) or create a smaller one?
+                                        // Spec says "small" is 14.
+                                        // Spec didn't define "caption".
+                                        // I'll stick to .font(.caption) (11ish) OR define `basaltCaption`?
+                                        // I defined `basaltSmall` (14).
+                                        // I'll use `Font.caption` (System) or define one.
+                                        // My `Font+Design.swift` defines `basaltSmall` as 14.
+                                        // I DO NOT have "Caption" (11) in my extension yet. Let's add it or use system.
+                                        // Wait, I didn't add basaltCaption in the file write step!
+                                        // I only added Large, Medium, Small.
+                                        // So I should use .font(.caption) OR add it.
+                                        // I'll use .font(.system(size: 12)) or similar if I want to match visually.
+                                        // Let's check `Font+Design.swift` again.
+                                        // I wrote: Large(18), Medium(16), Small(14).
+                                        // I missed Caption in that file.
+                                        // I'll use .basaltSmall for now or stick to system .caption.
+                                        // Let's us .basaltSmall (14) for readability or .caption.
+                                        // I'll use .font(.system(size: 12)) for now to be safe or just keep .caption.
+                                        // Let's use simple .font(.caption) for now as it's not strictly in "App" 6 rows.
+                                        .foregroundColor(.white.opacity(0.8))
+                                }
+                            }
+                        } else {
+                             Spacer()
+                        }
+                        
+                        Spacer()
+                        
+                        // Download Button
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                showDownloadPrompt = true
+                            }
+                            downloadOriginalImage()
+                        } label: {
+                            Image("circle-arrow-down-c")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 40, height: 40)
+                                .foregroundColor(.white)
+                                .padding(0)
+                        }
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.black.opacity(0.4), Color.black.opacity(0)],
+                            startPoint: .bottom,
+                            endPoint: .top
+                        )
+                    )
+
+                    .scrollTransition { content, phase in
+                        content.opacity(phase.isIdentity ? 1.0 : 0.0)
+                    }
+                }
+                
+                // Download Prompt Overlay
+                if showDownloadPrompt {
+                    Button {
+                        if downloadState == .idle {
+                            dismissTask?.cancel()
+                            // Haptic: Light impact for initiating action
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                            downloadOriginalImage()
+                            // Do not close immediately, wait for completion
+                        } else if downloadState == .saved || downloadState == .openImage {
+                            // Haptic: Medium impact for opening external app
+                            let generator = UIImpactFeedbackGenerator(style: .medium)
+                            generator.impactOccurred()
+                            // Open Photos App
+                            if let url = URL(string: "photos-redirect://") {
+                                if UIApplication.shared.canOpenURL(url) {
+                                    UIApplication.shared.open(url)
+                                }
+                            }
+                            // Close prompt immediately if user clicks "Open Image" or "Saved"
+                             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                showDownloadPrompt = false
+                                downloadState = .idle
+                            }
+                        }
+                    } label: {
+                        HStack(alignment: .center, spacing: 8) {
+                            if downloadState == .downloading {
+                                ProgressView()
+                                    .tint(.white)
+                                Text("Downloading...")
+                                    .font(.basaltSmallEmphasized)
+                                    .foregroundColor(.white)
+                            } else if downloadState == .saved {
+                                Image("check-circle-c")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.white)
+                                    .foregroundColor(.white)
+                                Text("Saved to Photos")
+                                    .font(.basaltSmallEmphasized)
+                                    .foregroundColor(.white)
+                            } else if downloadState == .openImage {
+                                Image("image-c") // Assuming 'image-c' is the asset name
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.white)
+                                Text("Open Image")
+                                    .font(.basaltSmallEmphasized)
+                                    .foregroundColor(.white)
+                            } else {
+                                Image("circle-arrow-down-c")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.white)
+                                
+                                Text("Download")
+                                    .font(.basaltSmallEmphasized)
+                                    .foregroundColor(.white)
+                            }
+                        }
+                        .frame(height: 40)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
+                        .basaltGlass(tint: .black.opacity(0.1))
+                    }
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
+                    .zIndex(100)
+                    .onAppear {
+                        // Auto-dismiss after 2 seconds if still idle
+                        if downloadState == .idle {
+                            dismissTask?.cancel()
+                            let task = DispatchWorkItem {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                    showDownloadPrompt = false
+                                }
+                            }
+                            dismissTask = task
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: task)
+                        }
+                    }
                 }
             }
             .frame(width: cardGeo.size.width, height: cardGeo.size.height)
@@ -220,7 +417,13 @@ struct WallpaperCard: View {
     
     // Function to download the full resolution image
     private func downloadOriginalImage() {
-        guard let url = URL(string: wallpaper.url) else { return }
+        // Use Cloudflare flexible variant for original quality download
+        let downloadURLString = CloudflareImageService.downloadURL(from: wallpaper.url)
+        guard let url = URL(string: downloadURLString) else { return }
+        
+        withAnimation {
+            downloadState = .downloading
+        }
         
         // Use a background task to download
         Task {
@@ -228,20 +431,61 @@ struct WallpaperCard: View {
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let image = UIImage(data: data) {
                     let imageSaver = ImageSaver()
-                    imageSaver.writeToPhotoAlbum(image: image)
                     
-                    // Optional: Haptic feedback
-                    let generator = UINotificationFeedbackGenerator()
-                    generator.notificationOccurred(.success)
+                    imageSaver.successHandler = {
+                        DispatchQueue.main.async {
+                            let generator = UINotificationFeedbackGenerator()
+                            generator.notificationOccurred(.success)
+                            
+                            withAnimation {
+                                self.downloadState = .saved
+                            }
+                            
+                            // 1. Saved State (already set)
+                            
+                            // 2. Change to Open Image after 2 second
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                withAnimation(.spring(response: 0.4, dampingFraction: 0.5, blendDuration: 0)) {
+                                    self.downloadState = .openImage
+                                }
+                                
+                                // 3. Auto-close after another 4 seconds 
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 4.0) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                                        self.showDownloadPrompt = false
+                                        // self.downloadState = .idle // Optional: reset only when showing prompt again?
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    imageSaver.errorHandler = { error in
+                        print("Save error: \(error.localizedDescription)")
+                         DispatchQueue.main.async {
+                             withAnimation {
+                                 // Revert to idle on error
+                                 self.downloadState = .idle
+                             }
+                         }
+                    }
+
+                    imageSaver.writeToPhotoAlbum(image: image)
                 }
             } catch {
                 print("Download failed: \(error.localizedDescription)")
+                withAnimation {
+                    downloadState = .idle
+                }
             }
         }
     }
 }
 
 class ImageSaver: NSObject {
+    var successHandler: (() -> Void)?
+    var errorHandler: ((Error) -> Void)?
+
     func writeToPhotoAlbum(image: UIImage) {
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveCompleted), nil)
     }
@@ -249,13 +493,25 @@ class ImageSaver: NSObject {
     @objc func saveCompleted(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let error = error {
             print("Save error: \(error.localizedDescription)")
+            errorHandler?(error)
         } else {
             print("Save finished!")
+            successHandler?()
         }
     }
 }
 
 #Preview {
-    // Preview with a sample collection ID
-    CollectionDetailView(collectionId: "sample-id")
+    // Preview with a known valid collection ID (Impressionists)
+    CollectionDetailView(initialCollection: Collection(
+        id: "cmk4760ia0015pm3zjok7cwrr",
+        name: "Impressionists",
+        slug: "impressionists",
+        description: "Focus on light and color",
+        coverImage: "https://example.com/image.jpg",
+        wallpaperCount: 10,
+        order: 0,
+        channel: "HUMAN",
+        wallpapers: []
+    ))
 }

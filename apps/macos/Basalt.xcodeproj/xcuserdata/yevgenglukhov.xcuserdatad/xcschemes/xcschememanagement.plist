@@ -4,7 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Basalt App Store.xcscheme_^#shared#^_</key>
+		<key>Basalt MAS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
@@ -43,6 +43,11 @@
 			<true/>
 		</dict>
 		<key>539F64402F0AE58300B73235</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>539F644D2F0AE5ED00B73235</key>
 		<dict>
 			<key>primary</key>
 			<true/>

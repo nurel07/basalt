@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "apps/ios",
+			"name": "iOS App"
+		},
+		{
+			"path": "apps/macos",
+			"name": "macOS App"
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#3c6382",
+			"titleBar.activeBackground": "#3c6382",
+			"titleBar.activeForeground": "#ffffff"
+		}
+	}
+}

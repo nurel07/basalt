@@ -4,7 +4,8 @@ import SwiftUI
 struct BasaltiOSApp: App {
     var body: some Scene {
         WindowGroup {
-            CollectionsView()
+            MainTabView()
+                .preferredColorScheme(.dark)
         }
     }
 }

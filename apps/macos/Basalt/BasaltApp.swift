@@ -3,6 +3,7 @@ import AppKit
 import Combine
 import Network
 import ServiceManagement
+import CryptoKit
 
 // MARK: - 1. Constants & Configuration
 
@@ -150,6 +151,48 @@ struct NetworkService {
 struct ImageService {
     private let fileManager = FileManager.default
     
+    // MARK: - File System Helpers
+    
+    /// Generates a stable, deterministic hash from a string using SHA256
+    private func stableHash(_ input: String) -> String {
+        let data = Data(input.utf8)
+        let digest = SHA256.hash(data: data)
+        // Use first 8 bytes (16 hex chars) for compact but unique filename
+        return digest.prefix(8).map { String(format: "%02x", $0) }.joined()
+    }
+    
+    /// Returns the base Basalt folder in Application Support
+    private func getBasaltFolder() -> URL {
+        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        return appSupportURL.appendingPathComponent("Basalt")
+    }
+    
+    /// Returns today's cache folder (Cache/YYYY-MM-DD/)
+    private func getTodayCacheFolder() -> URL {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let todayString = formatter.string(from: Date())
+        return getBasaltFolder().appendingPathComponent("Cache").appendingPathComponent(todayString)
+    }
+    
+    /// Converts a string to a safe filename (lowercase, hyphens, no special chars)
+    func sanitizeForFilename(_ input: String) -> String {
+        let lowercased = input.lowercased()
+        // Replace spaces and underscores with hyphens
+        var sanitized = lowercased.replacingOccurrences(of: " ", with: "-")
+        sanitized = sanitized.replacingOccurrences(of: "_", with: "-")
+        // Remove any non-alphanumeric characters except hyphens
+        sanitized = sanitized.components(separatedBy: CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-")).inverted).joined()
+        // Collapse multiple hyphens into one
+        while sanitized.contains("--") {
+            sanitized = sanitized.replacingOccurrences(of: "--", with: "-")
+        }
+        // Trim hyphens from start/end and limit length
+        sanitized = sanitized.trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+        if sanitized.count > 50 { sanitized = String(sanitized.prefix(50)) }
+        return sanitized.isEmpty ? "untitled" : sanitized
+    }
+    
     /// Generates the Cloudinary URL with overlays and resizing
     func generateUrl(for wallpaper: Wallpaper, screen: NSScreen, fitToVertical: Bool) -> URL? {
         // 1. Calculate Resolution
@@ -268,16 +311,15 @@ struct ImageService {
     
     /// Downloads image to Disk and returns local URL
     func downloadImage(url: URL, wallpaperId: String) async throws -> URL {
-        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let folderURL = appSupportURL.appendingPathComponent("Basalt")
+        let folderURL = getTodayCacheFolder()
         
-        // Ensure folder exists
+        // Ensure folder exists (creates Cache/YYYY-MM-DD/)
         if !fileManager.fileExists(atPath: folderURL.path) {
             try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)
         }
         
-        // FIX: Use hash of the absolute URL to ensure unique filenames for different Cloudinary transformations (overlays, sizes)
-        let urlHash = abs(url.absoluteString.hashValue)
+        // Use stable SHA256 hash for unique but consistent filenames
+        let urlHash = stableHash(url.absoluteString)
         let filename = "wallpaper_\(wallpaperId)_\(urlHash).jpg"
         let destinationURL = folderURL.appendingPathComponent(filename)
         
@@ -299,8 +341,6 @@ struct ImageService {
         if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
             let errorData = try? Data(contentsOf: tempUrl)
             let errorString = String(data: errorData ?? Data(), encoding: .utf8) ?? "Unknown error"
-            // print("❌ Download Failed [\(httpResponse.statusCode)] for: \(url.absoluteString)")
-            // print("Server Response: \(errorString)")
             throw NSError(domain: "ImageService", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode): \(errorString)"])
         }
         
@@ -312,7 +352,6 @@ struct ImageService {
         }
         
         // Move
-        // Ensure destination doesn't exist (race condition safety)
         if fileManager.fileExists(atPath: destinationURL.path) {
             try? fileManager.removeItem(at: destinationURL)
         }
@@ -330,7 +369,7 @@ struct ImageService {
     /// Checks if the image needs local padding (vertical fit) OR text overlay and generates it if so.
     /// Returns the new URL or the original if no processing needed.
     @MainActor
-    func processImageForScreen(sourceUrl: URL, screen: NSScreen, fitVertical: Bool, originalUrlString: String, overlayText: String?) throws -> URL {
+    func processImageForScreen(sourceUrl: URL, screen: NSScreen, fitVertical: Bool, originalUrlString: String, overlayText: String?, wallpaperName: String?, artistName: String?) throws -> URL {
         // 1. Determine Needs
         
         // A. Padding Criteria
@@ -373,10 +412,12 @@ struct ImageService {
         let pixelHeight = min(screenPixelHeight, sourceHeight)
         let targetSize = NSSize(width: pixelWidth, height: pixelHeight)
         
-        // Output Filename (Hash based on params to cache it)
-        // Include "v8" for Resolution Optimization
-        let fileSuffix = "_\(needsPadding ? "pad" : "fill")\(needsText ? "txt" : "")_v8"
-        let newFilename = "processed_\(sourceUrl.deletingPathExtension().lastPathComponent)\(fileSuffix).jpg"
+        // Output Filename: Human-readable format with fit mode
+        // basalt-{title}-by-{artist}-{width}x{height}-{mode}.jpg
+        let safeName = sanitizeForFilename(wallpaperName ?? "untitled")
+        let safeArtist = sanitizeForFilename(artistName ?? "unknown")
+        let fitMode = needsPadding ? "pad" : "fill"
+        let newFilename = "basalt-\(safeName)-by-\(safeArtist)-\(pixelWidth)x\(pixelHeight)-\(fitMode).jpg"
         let folderURL = sourceUrl.deletingLastPathComponent()
         let destUrl = folderURL.appendingPathComponent(newFilename)
         
@@ -519,34 +560,56 @@ struct ImageService {
         
         try jpgData.write(to: destUrl)
         
+        // 6. Delete source file (we only need the processed version)
+        try? fileManager.removeItem(at: sourceUrl)
+        
         return destUrl
     }
     
-    /// Deletes processed and downloaded wallpapers older than the specified days
+    /// Cleans up old cache and migrates from legacy flat structure
     func cleanupOldFiles(olderThanDays: Int = 3) {
-        let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let folderURL = appSupportURL.appendingPathComponent("Basalt")
+        let basaltFolder = getBasaltFolder()
+        let cacheFolder = basaltFolder.appendingPathComponent("Cache")
         
-        guard fileManager.fileExists(atPath: folderURL.path) else { return }
+        guard fileManager.fileExists(atPath: basaltFolder.path) else { return }
         
+        // MIGRATION: Delete legacy flat files in root Basalt folder (one-time cleanup)
+        do {
+            let rootContents = try fileManager.contentsOfDirectory(at: basaltFolder, includingPropertiesForKeys: nil)
+            for fileURL in rootContents {
+                let filename = fileURL.lastPathComponent
+                // Delete old wallpaper_* and processed_* files in the root folder (not in Cache/)
+                if filename.hasPrefix("wallpaper_") || filename.hasPrefix("processed_") {
+                    try? fileManager.removeItem(at: fileURL)
+                    #if DEBUG
+                    print("🧹 Migrated (deleted) legacy file: \(filename)")
+                    #endif
+                }
+            }
+        } catch {
+            #if DEBUG
+            print("⚠️ Migration cleanup error: \(error.localizedDescription)")
+            #endif
+        }
+        
+        // DATE-BASED CLEANUP: Delete old Cache/YYYY-MM-DD folders
+        guard fileManager.fileExists(atPath: cacheFolder.path) else { return }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -olderThanDays, to: Date()) ?? Date()
         
         do {
-            let contents = try fileManager.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: [.contentModificationDateKey])
+            let dateFolders = try fileManager.contentsOfDirectory(at: cacheFolder, includingPropertiesForKeys: nil)
             
-            for fileURL in contents {
-                let filename = fileURL.lastPathComponent
+            for folderURL in dateFolders {
+                let folderName = folderURL.lastPathComponent
                 
-                // Only clean up our generated files (processed_* and wallpaper_*)
-                guard filename.hasPrefix("processed_") || filename.hasPrefix("wallpaper_") else { continue }
-                
-                // Check modification date
-                if let attrs = try? fileManager.attributesOfItem(atPath: fileURL.path),
-                   let modDate = attrs[.modificationDate] as? Date,
-                   modDate < cutoffDate {
-                    try? fileManager.removeItem(at: fileURL)
+                // Parse the folder name as a date (YYYY-MM-DD)
+                if let folderDate = formatter.date(from: folderName), folderDate < cutoffDate {
+                    try? fileManager.removeItem(at: folderURL)
                     #if DEBUG
-                    print("🧹 Cleaned up old file: \(filename)")
+                    print("🧹 Cleaned up old cache folder: \(folderName)")
                     #endif
                 }
             }
@@ -699,6 +762,29 @@ class WallpaperManager: ObservableObject {
         defaults.removeObject(forKey: Constants.overrideWallpaperKey)
         // FORCE CLEAN REFRESH: Clear the daily cache too so we re-fetch the manifest
         defaults.removeObject(forKey: Constants.dailyStateKey)
+        checkForUpdates()
+    }
+    
+    /// Resets all settings to defaults and refreshes
+    func resetToDefaults() {
+        // Reset all settings to default values (without triggering individual didSet refreshes)
+        defaults.removeObject(forKey: Constants.useSameWallpaperKey)
+        defaults.removeObject(forKey: Constants.selectedChannelsKey)
+        defaults.removeObject(forKey: Constants.fitVerticalKey)
+        defaults.removeObject(forKey: Constants.syncScreensaverKey)
+        
+        // Update published properties directly
+        useSameWallpaper = true
+        selectedChannels = Set(Constants.defaultChannels)
+        fitVerticalDisplays = true
+        screensaverEnabled = false
+        
+        // Also do what resetToDaily does
+        defaults.removeObject(forKey: Constants.overrideContextIdKey)
+        defaults.removeObject(forKey: Constants.overrideWallpaperIdKey)
+        defaults.removeObject(forKey: Constants.overrideWallpaperKey)
+        defaults.removeObject(forKey: Constants.dailyStateKey)
+        
         checkForUpdates()
     }
     
@@ -933,7 +1019,9 @@ class WallpaperManager: ObservableObject {
                                 screen: screen,
                                 fitVertical: self.fitVerticalDisplays,
                                 originalUrlString: wallpaper.url,
-                                overlayText: self.imageService.getOverlayText(for: wallpaper)
+                                overlayText: self.imageService.getOverlayText(for: wallpaper),
+                                wallpaperName: wallpaper.name,
+                                artistName: wallpaper.artist
                             )
                             
                             try await MainActor.run {
@@ -941,7 +1029,7 @@ class WallpaperManager: ObservableObject {
                                 
                                 // Sync Screensaver if this is the first/main screen and enabled
                                 if index == 0 && self.screensaverEnabled {
-                                    self.syncToScreensaver(sourceUrl: processedPath)
+                                    self.syncToScreensaver(sourceUrl: processedPath, wallpaperName: wallpaper.name, artistName: wallpaper.artist)
                                 }
                             }
                             return (index, info, nil)
@@ -1028,6 +1116,9 @@ class WallpaperManager: ObservableObject {
         print("📅 Day changed. Triggering wallpaper refresh...")
         #endif
         
+        // Daily cleanup: Remove cache folders older than 3 days
+        ImageService().cleanupOldFiles()
+        
         // Clear stale daily state to force a fresh fetch
         defaults.removeObject(forKey: Constants.dailyStateKey)
         
@@ -1038,7 +1129,7 @@ class WallpaperManager: ObservableObject {
         }
     }
     
-    func syncToScreensaver(sourceUrl: URL) {
+    func syncToScreensaver(sourceUrl: URL, wallpaperName: String?, artistName: String?) {
         let fileManager = FileManager.default
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let screensaverDir = appSupport.appendingPathComponent("Basalt/Screensaver")
@@ -1049,21 +1140,25 @@ class WallpaperManager: ObservableObject {
                 try fileManager.createDirectory(at: screensaverDir, withIntermediateDirectories: true)
             }
             
-            // 2. Clear Old Files (We only want the CURRENT wallpaper there for a static screensaver)
-            // If user wants a history, we would skip this. But "Today's Image" implies singular.
-            let contents = try fileManager.contentsOfDirectory(at: screensaverDir, includingPropertiesForKeys: nil)
-            for file in contents {
+            // 2. Clear any old files first
+            let contents = try? fileManager.contentsOfDirectory(at: screensaverDir, includingPropertiesForKeys: nil)
+            for file in contents ?? [] {
                 try? fileManager.removeItem(at: file)
             }
             
-            // 3. Copy New File
-            let destUrl = screensaverDir.appendingPathComponent(sourceUrl.lastPathComponent)
+            // 3. Generate readable filename
+            let safeName = imageService.sanitizeForFilename(wallpaperName ?? "untitled")
+            let safeArtist = imageService.sanitizeForFilename(artistName ?? "unknown")
+            let filename = "basalt-\(safeName)-by-\(safeArtist).jpg"
+            let destUrl = screensaverDir.appendingPathComponent(filename)
+            
+            // 4. Copy New File
             try fileManager.copyItem(at: sourceUrl, to: destUrl)
             
-            // print("✅ Synced to Screensaver: \(destUrl.path)")
-            
         } catch {
-            // print("❌ Screensaver Sync Failed: \(error)")
+            #if DEBUG
+            print("❌ Screensaver Sync Failed: \(error)")
+            #endif
         }
     }
     
@@ -1259,9 +1354,9 @@ struct SettingsView: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
-                // Refresh Action
-                Button("Refresh") {
-                    manager.resetToDaily()
+                // Reset to Default Action
+                Button("Reset to Default") {
+                    manager.resetToDefaults()
                 }
                 .buttonStyle(.plain)
                 .font(.caption)
