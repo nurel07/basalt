@@ -11,7 +11,9 @@ export default async function Command() {
   try {
     const response = await fetch(API_RANDOM_URL);
     if (!response.ok) {
-      throw new Error(`Failed to fetch wallpaper: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch wallpaper: ${response.status} ${response.statusText}`,
+      );
     }
     const randomWallpaper = (await response.json()) as Wallpaper;
 

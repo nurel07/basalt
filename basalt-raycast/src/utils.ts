@@ -7,12 +7,10 @@ import { environment } from "@raycast/api";
 
 const execPromise = promisify(exec);
 
-export const API_URL =
-  "https://basalt-prod.up.railway.app/api/wallpapers/today";
 export const API_TRIPLE_URL =
   "https://basalt-prod.up.railway.app/api/wallpapers/raycast-triple";
 export const API_RANDOM_URL =
-  "https://basalt-prod.up.railway.app/api/wallpapers/random";
+  "https://basalt-prod.up.railway.app/api/wallpapers/random-human";
 
 export interface Wallpaper {
   id: string;

@@ -4,33 +4,24 @@ A Raycast extension for [Basalt](https://basalt.yevgenglukhov.com) — a daily w
 
 ## What It Does
 
-Shows you today's wallpaper from Basalt right in Raycast. The collection is classic paintings and artworks, all chosen by hand — no algorithmic slop.
-
-You can:
-
-- See today's wallpaper with details (title, artist, year)
-- Set it as your desktop background
-- Download the full-resolution image
-- Read more about the artwork
+Browse and set Basalt wallpapers without leaving Raycast. The collection is classic paintings and artworks, all chosen by hand — no algorithmic slop.
 
 ## Commands
 
 **View Today's Wallpapers**
 
-This command shows you a list of three recent wallpapers from Basalt. You can browse through them, see a preview, and choose one to set as your desktop background or download.
+Shows the three most recent wallpapers. Preview them, see the details (title, artist, year), set one as your background, or download it.
 
 **Set Random Wallpaper**
 
-For a surprise. This command doesn't show any UI. It instantly fetches a random wallpaper from the Basalt collection and sets it as your desktop background.
-
-## Why This Exists
-
-If you use Basalt, this saves you a trip to the app or website. Just open Raycast, check today's art, set it if you like it, done.
+Instantly sets a random wallpaper from the Basalt collection. No UI, no prompts — just a fresh background.
 
 ## Requirements
 
-None. You don't need the Basalt Mac app — the extension talks directly to the service.
+None. The extension talks directly to Basalt — no Mac app needed.
 
 ## Screenshots
 
-![Extension Screenshot](assets/screenshot.png)
+![Basalt Screenshot 1](media/basalt-screenshot-01.jpg)
+![Basalt Screenshot 2](media/basalt-screenshot-02.jpg)
+![Basalt Screenshot 3](media/basalt-screenshot-03.jpg)

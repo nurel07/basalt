@@ -18,14 +18,17 @@ import {
 } from "./utils";
 
 export default function Command() {
-  const { isLoading, data } = useFetch<{ today: Wallpaper; random: Wallpaper[] }>(API_TRIPLE_URL, {
+  const { isLoading, data } = useFetch<{
+    today: Wallpaper;
+    random: Wallpaper[];
+  }>(API_TRIPLE_URL, {
     onError: (error) => {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load wallpapers",
         message: error.message,
       });
-    }
+    },
   });
 
   // Combine today's wallpaper with random ones
@@ -90,7 +93,7 @@ ${wallpaper.description || ""}
                       try {
                         const path = await downloadWallpaper(
                           wallpaper.url,
-                          wallpaper.name
+                          wallpaper.name,
                         );
                         toast.style = Toast.Style.Success;
                         toast.title = "Wallpaper downloaded";
@@ -99,7 +102,9 @@ ${wallpaper.description || ""}
                         toast.style = Toast.Style.Failure;
                         toast.title = "Download failed";
                         toast.message =
-                          error instanceof Error ? error.message : String(error);
+                          error instanceof Error
+                            ? error.message
+                            : String(error);
                       }
                     }}
                   />
@@ -108,7 +113,7 @@ ${wallpaper.description || ""}
                     icon={Icon.Globe}
                     onAction={() =>
                       open(
-                        wallpaper.websiteUrl || "https://basalt.yevgenglukhov.com"
+                        `https://basalt.yevgenglukhov.com/art/${wallpaper.id}`,
                       )
                     }
                   />
