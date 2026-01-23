@@ -28,6 +28,9 @@ export async function GET(request: Request) {
             };
         }
 
+        // Exclude MOBILE items (Desktop only for random)
+        where.type = "DESKTOP";
+
         // 1. Get Count
         const count = await prisma.wallpaper.count({ where });
 
