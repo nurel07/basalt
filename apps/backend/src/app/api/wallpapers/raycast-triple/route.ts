@@ -3,6 +3,44 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic'; // Ensure this endpoint is not cached
 
+// Simple Pseudo-Random Number Generator (Linear Congruential Generator)
+class SeededRandom {
+    private seed: number;
+
+    constructor(seedStr: string) {
+        this.seed = this.cyrb128(seedStr);
+    }
+
+    // String hashing function (cyrb128 mix) to get a numeric seed
+    private cyrb128(str: string): number {
+        let h1 = 1779033703, h2 = 3144134277,
+            h3 = 1013904242, h4 = 2773480762;
+        for (let i = 0, k; i < str.length; i++) {
+            k = str.charCodeAt(i);
+            h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+            h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+            h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+            h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+        }
+        h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+        h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+        h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+        h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+        return (h1 ^ h2 ^ h3 ^ h4) >>> 0;
+    }
+
+    // Returns a pseudo-random number between 0 and 1
+    next(): number {
+        this.seed = (this.seed * 1664525 + 1013904223) % 4294967296;
+        return this.seed / 4294967296;
+    }
+
+    // Helper: Random integer between 0 and max (exclusive)
+    nextInt(max: number): number {
+        return Math.floor(this.next() * max);
+    }
+}
+
 // Helper to inject Cloudinary optimization params
 function optimizeUrl(url: string, width: number = 1248): string {
     const keyword = "/upload/";
@@ -57,14 +95,17 @@ export async function GET() {
         let randomWallpapers: typeof todayWallpaper[] = [];
 
         if (pastWallpapersCount > 0) {
-            // Get 2 random wallpapers using skip with random offset
-            // If we have less than 2, we'll just get what we have
+            // Initialize Random Generator with Today's formatted date as seed
+            // This ensures everyone gets the same "Random" wallpapers for the day
+            const todayStr = new Date().toISOString().split('T')[0]; // "2024-05-20"
+            const rng = new SeededRandom(todayStr);
+
             const numToFetch = Math.min(2, pastWallpapersCount);
 
-            // Generate unique random indices
+            // Generate unique random indices using our seeded RNG
             const randomIndices: number[] = [];
             while (randomIndices.length < numToFetch) {
-                const randIndex = Math.floor(Math.random() * pastWallpapersCount);
+                const randIndex = rng.nextInt(pastWallpapersCount);
                 if (!randomIndices.includes(randIndex)) {
                     randomIndices.push(randIndex);
                 }
