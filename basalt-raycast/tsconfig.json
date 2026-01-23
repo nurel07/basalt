@@ -5,15 +5,14 @@
     "target": "ESNext",
     "moduleResolution": "Node",
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
+      "paths": {
+      "@/*": [
+        "src/*"
+      ]
     },
-    "jsx": "react-jsx",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true
+    "jsx": "react-jsx"
   },
-  "include": ["src"]
+  "include": [
+    "src/**/*"
+  ]
 }

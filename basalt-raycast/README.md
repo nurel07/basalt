@@ -13,6 +13,16 @@ You can:
 - Download the full-resolution image
 - Read more about the artwork
 
+## Commands
+
+**View Today's Wallpapers**
+
+This command shows you a list of three recent wallpapers from Basalt. You can browse through them, see a preview, and choose one to set as your desktop background or download.
+
+**Set Random Wallpaper**
+
+For a surprise. This command doesn't show any UI. It instantly fetches a random wallpaper from the Basalt collection and sets it as your desktop background.
+
 ## Why This Exists
 
 If you use Basalt, this saves you a trip to the app or website. Just open Raycast, check today's art, set it if you like it, done.

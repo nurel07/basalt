@@ -9,6 +9,10 @@ const execPromise = promisify(exec);
 
 export const API_URL =
   "https://basalt-prod.up.railway.app/api/wallpapers/today";
+export const API_TRIPLE_URL =
+  "https://basalt-prod.up.railway.app/api/wallpapers/raycast-triple";
+export const API_RANDOM_URL =
+  "https://basalt-prod.up.railway.app/api/wallpapers/random";
 
 export interface Wallpaper {
   id: string;
@@ -20,17 +24,27 @@ export interface Wallpaper {
   websiteUrl?: string;
 }
 
-export function getThumbnailUrl(url: string, width: number): string {
+export function getThumbnailUrl(
+  url: string,
+  options: { width?: number; height?: number },
+): string {
+  const params = [];
+  if (options.width) params.push(`w_${options.width}`);
+  if (options.height) params.push(`h_${options.height}`);
+
   // Check if it's a Cloudinary URL
   if (url.includes("cloudinary.com")) {
-    // Insert transformation parameters after /upload/
-    return url.replace("/upload/", `/upload/w_${width},c_limit,q_auto,f_auto/`);
+    const transformation = `${params.join(",")},c_limit,q_auto,f_auto`;
+    return url.replace("/upload/", `/upload/${transformation}/`);
   }
 
   // Check if it's a Cloudflare Image URL
   if (url.includes("imagedelivery.net")) {
-    // Replace the last segment (variant name) with transformation parameters
-    return url.replace(/\/([^/]+)$/, `/w=${width},fit=scale-down`);
+    const cfParams = [];
+    if (options.width) cfParams.push(`w=${options.width}`);
+    if (options.height) cfParams.push(`h=${options.height}`);
+    cfParams.push("fit=contain");
+    return url.replace(/\/([^/]+)$/, `/${cfParams.join(",")}`);
   }
 
   return url;

@@ -1,8 +1,8 @@
 {
-  "name": "basalt-wallpaper",
-  "title": "Basalt Wallpaper",
-  "description": "Daily artistic wallpapers from Basalt.",
-  "icon": "command-icon.png",
+  "name": "basalt-wallpapers",
+  "title": "Art Wallpapers. Basalt 02",
+  "description": "Hand-picked art, daily.",
+  "icon": "basalt-icon.png",
   "author": "yevgen_glukhov",
   "categories": [
     "Design Tools",
@@ -12,9 +12,17 @@
   "commands": [
     {
       "name": "index",
-      "title": "Today's Wallpaper",
+      "title": "Today's Wallpapers",
       "description": "View and set today's Basalt wallpaper",
-      "mode": "view"
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
+      "name": "random-wallpaper",
+      "title": "Set Random Wallpaper",
+      "description": "Set a random wallpaper from Basalt",
+      "mode": "no-view",
+      "icon": "basalt-icon.png"
     }
   ],
   "dependencies": {

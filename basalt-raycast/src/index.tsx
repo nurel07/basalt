@@ -1,11 +1,12 @@
 import {
-  Detail,
+  List,
   ActionPanel,
   Action,
   showToast,
   Toast,
   Icon,
   open,
+  Image,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import {
@@ -13,102 +14,110 @@ import {
   downloadWallpaper,
   getThumbnailUrl,
   Wallpaper,
-  API_URL,
+  API_TRIPLE_URL,
 } from "./utils";
 
 export default function Command() {
-  const { isLoading, data: wallpaper } = useFetch<Wallpaper>(API_URL, {
+  const { isLoading, data } = useFetch<{ today: Wallpaper; random: Wallpaper[] }>(API_TRIPLE_URL, {
     onError: (error) => {
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to load wallpaper",
+        title: "Failed to load wallpapers",
         message: error.message,
       });
-    },
+    }
   });
 
-  const markdown = wallpaper
-    ? `![${wallpaper.name}](${getThumbnailUrl(wallpaper.url, 500)})`
-    : "";
+  // Combine today's wallpaper with random ones
+  const wallpapers = data ? [data.today, ...data.random] : [];
 
   return (
-    <Detail
-      isLoading={isLoading}
-      navigationTitle="Today's Wallpaper"
-      markdown={markdown}
-      metadata={
-        wallpaper ? (
-          <Detail.Metadata>
-            <Detail.Metadata.Label title="Title" text={wallpaper.name} />
-            <Detail.Metadata.Label title="Artist" text={wallpaper.artist} />
-            <Detail.Metadata.Label title="Year" text={wallpaper.creationDate} />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.Link
-              title=""
-              target="https://basalt.yevgenglukhov.com/today"
-              text="Learn more about the artwork"
-            />
-          </Detail.Metadata>
-        ) : null
-      }
-      actions={
-        wallpaper ? (
-          <ActionPanel>
-            <Action
-              title="Set Desktop Wallpaper"
-              icon={Icon.Desktop}
-              onAction={async () => {
-                const toast = await showToast({
-                  style: Toast.Style.Animated,
-                  title: "Setting wallpaper...",
-                });
-                try {
-                  await setDesktopWallpaper(wallpaper.url);
-                  toast.style = Toast.Style.Success;
-                  toast.title = "Wallpaper set successfully";
-                } catch (error) {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Failed to set wallpaper";
-                  toast.message =
-                    error instanceof Error ? error.message : String(error);
-                }
-              }}
-            />
-            <ActionPanel.Section>
-              <Action
-                title="Download Wallpaper"
-                icon={Icon.Download}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-                onAction={async () => {
-                  const toast = await showToast({
-                    style: Toast.Style.Animated,
-                    title: "Downloading...",
-                  });
-                  try {
-                    const path = await downloadWallpaper(
-                      wallpaper.url,
-                      wallpaper.name,
-                    );
-                    toast.style = Toast.Style.Success;
-                    toast.title = "Wallpaper downloaded";
-                    toast.message = `Saved to ${path}`;
-                  } catch (error) {
-                    toast.style = Toast.Style.Failure;
-                    toast.title = "Download failed";
-                    toast.message =
-                      error instanceof Error ? error.message : String(error);
-                  }
-                }}
-              />
-              <Action
-                title="Install Basalt App"
-                icon={Icon.Monitor}
-                onAction={() => open("https://basalt.yevgenglukhov.com")}
-              />
-            </ActionPanel.Section>
-          </ActionPanel>
-        ) : null
-      }
-    />
+    <List isLoading={isLoading} isShowingDetail>
+      {wallpapers?.map((wallpaper) => {
+        const imageUrl = getThumbnailUrl(wallpaper.url, { height: 280 });
+        const markdown = `
+<img src="${imageUrl}" alt="${wallpaper.name}" height="280" />
+
+**${wallpaper.name}**
+
+${wallpaper.artist}, ${wallpaper.creationDate}
+
+${wallpaper.description || ""}
+        `;
+
+        return (
+          <List.Item
+            key={wallpaper.id}
+            id={wallpaper.id}
+            title={`${wallpaper.name} by ${wallpaper.artist}`}
+            icon={{
+              source: getThumbnailUrl(wallpaper.url, { width: 100 }),
+              mask: Image.Mask.RoundedRectangle,
+            }}
+            detail={<List.Item.Detail markdown={markdown} />}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Set Desktop Wallpaper"
+                  icon={Icon.Desktop}
+                  onAction={async () => {
+                    const toast = await showToast({
+                      style: Toast.Style.Animated,
+                      title: "Setting wallpaper...",
+                    });
+                    try {
+                      await setDesktopWallpaper(wallpaper.url);
+                      toast.style = Toast.Style.Success;
+                      toast.title = "Wallpaper set successfully";
+                    } catch (error) {
+                      toast.style = Toast.Style.Failure;
+                      toast.title = "Failed to set wallpaper";
+                      toast.message =
+                        error instanceof Error ? error.message : String(error);
+                    }
+                  }}
+                />
+                <ActionPanel.Section>
+                  <Action
+                    title="Download Wallpaper"
+                    icon={Icon.Download}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={async () => {
+                      const toast = await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Downloading...",
+                      });
+                      try {
+                        const path = await downloadWallpaper(
+                          wallpaper.url,
+                          wallpaper.name
+                        );
+                        toast.style = Toast.Style.Success;
+                        toast.title = "Wallpaper downloaded";
+                        toast.message = `Saved to ${path}`;
+                      } catch (error) {
+                        toast.style = Toast.Style.Failure;
+                        toast.title = "Download failed";
+                        toast.message =
+                          error instanceof Error ? error.message : String(error);
+                      }
+                    }}
+                  />
+                  <Action
+                    title="Learn More on Basalt"
+                    icon={Icon.Globe}
+                    onAction={() =>
+                      open(
+                        wallpaper.websiteUrl || "https://basalt.yevgenglukhov.com"
+                      )
+                    }
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
   );
 }
