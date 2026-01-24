@@ -79,12 +79,12 @@ export async function POST(request: Request) {
                 },
                 badge: 1,
                 sound: "default",
-                payload: {
+                data: {
                     image_url: imageUrl, // For Notification Service Extension
                     wallpaper_id: wallpaper.id,
                 },
                 topic: "com.nurel.Basalt",
-                mutableContent: 1, // Critical for Service Extension
+                mutableContent: true, // Critical for Service Extension
             });
         });
 
