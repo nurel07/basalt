@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Wallpaper } from "./UploadModal";
 import { getOptimizedUrl } from "@/lib/cloudinary";
+import { Link as LinkIcon, Check } from "lucide-react";
+import { useState } from "react";
 
 
 
@@ -16,6 +18,7 @@ interface AdminWallpaperItemProps {
 
 export default function AdminWallpaperItem({ wallpaper, onReschedule, onEdit }: AdminWallpaperItemProps) {
     const router = useRouter();
+    const [copied, setCopied] = useState(false);
 
     const handleDelete = async () => {
         if (!confirm("Are you sure you want to delete this wallpaper?")) return;
@@ -31,6 +34,19 @@ export default function AdminWallpaperItem({ wallpaper, onReschedule, onEdit }: 
         }
     };
 
+    const handleCopyLink = async () => {
+        const url = `https://basalt.yevgenglukhov.com/art/${wallpaper.id}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy link:", err);
+            alert("Failed to copy link");
+        }
+    };
+
+
     return (
         <div className="group relative">
             <img
@@ -42,7 +58,14 @@ export default function AdminWallpaperItem({ wallpaper, onReschedule, onEdit }: 
 
             {/* Overlay with buttons, visible only on hover */}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-4 rounded-lg">
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-end gap-2 flex-wrap">
+                    <button
+                        onClick={handleCopyLink}
+                        className="bg-white/90 text-black px-3 py-1 rounded text-sm font-medium hover:bg-white flex items-center gap-1 min-w-[32px] justify-center"
+                        title="Copy public link"
+                    >
+                        {copied ? <Check className="w-4 h-4 text-green-600" /> : <LinkIcon className="w-4 h-4" />}
+                    </button>
                     {onReschedule && (
                         <button
                             onClick={() => onReschedule(wallpaper)}
