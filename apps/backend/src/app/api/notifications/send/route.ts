@@ -22,26 +22,32 @@ export async function POST(request: Request) {
         let force = false;
         try {
             const body = await request.json();
+            console.log("Start Debug: Received Body:", body);
             force = body.force === true;
         } catch (e) {
-            // Body might be empty, ignore
+            console.log("Error parsing body:", e);
         }
 
         // 1. Get tokens scheduled for the current hour (UTC)
         const currentHour = new Date().getUTCHours();
         const whereClause = force ? {} : { schedule: currentHour };
 
+        console.log(`Debug: Force=${force}, CurrentHour=${currentHour}, WhereClause=`, whereClause);
+
         const scheduledTokens = await prisma.deviceToken.findMany({
             where: whereClause,
-            // In a real app, you might handle timezone offsets here.
-            // For simplicity, we assume the schedule is stored in UTC or we just fire based on checking the user's local time vs server time.
-            // If 'schedule' is stored as "User's preferred 9 AM", we need to check if it is currently 9 AM in their timezone.
-            // However, the schema has `schedule` as Int and `timezone` string.
-            // For MVP, Fan-out is complicated with mixed timezones. 
-            // Let's assume we find all users where (CurrentUTC + Offset) % 24 == UserSchedule.
-            // But verifying logic in SQL is hard. 
-            // Let's stick to a simple "Send to everyone who wants it at this UTC hour" or just send to everyone for now if the schedule is just an int.
         });
+
+        console.log(`Debug: Found ${scheduledTokens.length} tokens.`);
+        // In a real app, you might handle timezone offsets here.
+        // For simplicity, we assume the schedule is stored in UTC or we just fire based on checking the user's local time vs server time.
+        // If 'schedule' is stored as "User's preferred 9 AM", we need to check if it is currently 9 AM in their timezone.
+        // However, the schema has `schedule` as Int and `timezone` string.
+        // For MVP, Fan-out is complicated with mixed timezones. 
+        // Let's assume we find all users where (CurrentUTC + Offset) % 24 == UserSchedule.
+        // But verifying logic in SQL is hard. 
+        // Let's stick to a simple "Send to everyone who wants it at this UTC hour" or just send to everyone for now if the schedule is just an int.
+
 
         // Simplification for MVP: Just fetch ALL tokens if we want to blast, 
         // or fetch matching `schedule` if we assume schedule is UTC.
