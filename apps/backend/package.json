@@ -17,6 +17,7 @@
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.0",
     "@uploadthing/react": "^7.3.3",
+    "apns2": "^12.2.0",
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

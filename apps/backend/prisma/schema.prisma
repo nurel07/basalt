@@ -56,3 +56,12 @@ model MobileCollection {
   
   wallpapers  Wallpaper[]
 }
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  schedule  Int      @default(9) // Hour of day (0-23)
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
