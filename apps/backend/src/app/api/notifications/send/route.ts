@@ -67,7 +67,7 @@ export async function POST(request: Request) {
             team: process.env.APNS_TEAM_ID,
             keyId: process.env.APNS_KEY_ID,
             signingKey: process.env.APNS_P8.replace(/\\n/g, '\n'), // Handle env var newlines
-            defaultTopic: "com.nurel.Basalt", // Replace with your Bundle ID
+            defaultTopic: process.env.BUNDLE_ID || "yevgen.glukhov.BasaltiOS", // Use env var for Bundle ID
         });
 
         // 4. Fan Out
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
                     image_url: imageUrl, // For Notification Service Extension
                     wallpaper_id: wallpaper.id,
                 },
-                topic: "com.nurel.Basalt",
+                topic: process.env.BUNDLE_ID || "yevgen.glukhov.BasaltiOS",
                 mutableContent: true, // Critical for Service Extension
             });
         });
