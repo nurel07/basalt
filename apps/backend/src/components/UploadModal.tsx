@@ -18,6 +18,7 @@ export interface Wallpaper {
     collectionId: string | null;
     collectionOrder?: number;
     releaseDate: Date | string | null;
+    artist?: string | null;
 }
 
 export interface MobileCollection {

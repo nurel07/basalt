@@ -103,7 +103,12 @@ export default function AdminWallpaperItem({ wallpaper, onReschedule, onEdit }: 
                             {wallpaper.releaseDate ? format(new Date(wallpaper.releaseDate), "yyyy-MM-dd") : "No Date"}
                         </p>
                     )}
-                    {wallpaper.name && <p className="font-semibold text-sm truncate">{wallpaper.name}</p>}
+                    {wallpaper.name && (
+                        <p className="font-semibold text-sm truncate">
+                            {wallpaper.name}
+                            {wallpaper.artist ? <span className="font-normal opacity-75"> by {wallpaper.artist}</span> : ""}
+                        </p>
+                    )}
                     {wallpaper.description && <p className="text-xs opacity-90 line-clamp-2">{wallpaper.description}</p>}
                 </div>
             </div>
