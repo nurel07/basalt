@@ -83,6 +83,7 @@ export async function POST(request: Request) {
             keyId: process.env.APNS_KEY_ID,
             signingKey: process.env.APNS_P8.replace(/\\n/g, '\n'), // Handle env var newlines
             defaultTopic: process.env.BUNDLE_ID || "yevgen.glukhov.BasaltiOS", // Use env var for Bundle ID
+            production: false, // Critical for testing with Xcode Debug builds
         });
 
         // 4. Fan Out

@@ -19,6 +19,11 @@ enum CloudflareImageService {
     /// Input:  https://imagedelivery.net/HASH/IMAGE_ID/variant
     /// Output: https://imagedelivery.net/HASH/IMAGE_ID/options
     private static func transformURL(_ urlString: String, options: String) -> String {
+        // Handle Cloudinary URLs with appropriate transformations
+        if urlString.contains("cloudinary.com") {
+            return transformCloudinaryURL(urlString, options: options)
+        }
+        
         guard urlString.contains("imagedelivery.net") else {
             // Not a Cloudflare URL, return as-is
             return urlString
@@ -37,5 +42,24 @@ enum CloudflareImageService {
         components.path = "/" + pathComponents.joined(separator: "/")
         
         return components.url?.absoluteString ?? urlString
+    }
+    
+    /// Transforms Cloudinary URLs with appropriate parameters
+    /// Input:  https://res.cloudinary.com/.../upload/.../image.jpg
+    /// Output: https://res.cloudinary.com/.../upload/w_1200,c_limit,q_auto,f_auto/.../image.jpg
+    private static func transformCloudinaryURL(_ urlString: String, options: String) -> String {
+        // Parse Cloudinary options from our format
+        let isDisplay = options.contains("w=1200")
+        let isDownload = options.contains("w=1440")
+        
+        if isDisplay {
+            // Display: optimize for UI with width limit and auto format
+            return urlString.replacingOccurrences(of: "/upload/", with: "/upload/w_1200,c_limit,q_auto,f_auto/")
+        } else if isDownload {
+            // Download: high quality with original dimensions
+            return urlString.replacingOccurrences(of: "/upload/", with: "/upload/q_auto:best,f_auto/")
+        }
+        
+        return urlString
     }
 }

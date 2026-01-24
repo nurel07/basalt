@@ -6,5 +6,7 @@
 	<array>
 		<string>Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf</string>
 	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Basalt saves wallpapers to your Photos library.</string>
 </dict>
 </plist>

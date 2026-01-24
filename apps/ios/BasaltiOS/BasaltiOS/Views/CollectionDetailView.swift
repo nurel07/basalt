@@ -16,6 +16,8 @@ struct CollectionDetailView: View {
                     ProgressView()
                         .controlSize(.large)
                         .tint(.basaltTextPrimary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.basaltBackgroundPrimary)
                 } else if let errorMessage = errorMessage {
                     ZStack {
                         Color.basaltBackgroundPrimary.ignoresSafeArea()

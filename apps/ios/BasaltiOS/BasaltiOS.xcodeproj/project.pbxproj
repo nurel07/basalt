@@ -7,10 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		533798302F24E92D001F0F9F /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 533798292F24E92D001F0F9F /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		53C393632F12508700A4469B /* Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 53C393622F12508700A4469B /* Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		5337982E2F24E92D001F0F9F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 539E88612F0C0FED00D852C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 533798282F24E92D001F0F9F;
+			remoteInfo = NotificationServiceExtension;
+		};
 		539E88772F0C0FEF00D852C8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 539E88612F0C0FED00D852C8 /* Project object */;
@@ -27,7 +35,22 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		533798352F24E92D001F0F9F /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				533798302F24E92D001F0F9F /* NotificationServiceExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		533798292F24E92D001F0F9F /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		539E88692F0C0FED00D852C8 /* BasaltiOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BasaltiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		539E88762F0C0FEF00D852C8 /* BasaltiOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasaltiOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		539E88802F0C0FEF00D852C8 /* BasaltiOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BasaltiOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,6 +58,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		533798342F24E92D001F0F9F /* Exceptions for "NotificationServiceExtension" folder in "NotificationServiceExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 533798282F24E92D001F0F9F /* NotificationServiceExtension */;
+		};
 		53C3935D2F124C4400A4469B /* Exceptions for "BasaltiOS" folder in "BasaltiOS" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -45,6 +75,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		5337982A2F24E92D001F0F9F /* NotificationServiceExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				533798342F24E92D001F0F9F /* Exceptions for "NotificationServiceExtension" folder in "NotificationServiceExtension" target */,
+			);
+			path = NotificationServiceExtension;
+			sourceTree = "<group>";
+		};
 		539E886B2F0C0FED00D852C8 /* BasaltiOS */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -66,6 +104,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		533798262F24E92D001F0F9F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		539E88662F0C0FED00D852C8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -96,6 +141,7 @@
 				539E886B2F0C0FED00D852C8 /* BasaltiOS */,
 				539E88792F0C0FEF00D852C8 /* BasaltiOSTests */,
 				539E88832F0C0FEF00D852C8 /* BasaltiOSUITests */,
+				5337982A2F24E92D001F0F9F /* NotificationServiceExtension */,
 				539E886A2F0C0FED00D852C8 /* Products */,
 				53C393622F12508700A4469B /* Fraunces-VariableFont_SOFT,WONK,opsz,wght.ttf */,
 			);
@@ -107,6 +153,7 @@
 				539E88692F0C0FED00D852C8 /* BasaltiOS.app */,
 				539E88762F0C0FEF00D852C8 /* BasaltiOSTests.xctest */,
 				539E88802F0C0FEF00D852C8 /* BasaltiOSUITests.xctest */,
+				533798292F24E92D001F0F9F /* NotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -114,6 +161,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		533798282F24E92D001F0F9F /* NotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 533798312F24E92D001F0F9F /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */;
+			buildPhases = (
+				533798252F24E92D001F0F9F /* Sources */,
+				533798262F24E92D001F0F9F /* Frameworks */,
+				533798272F24E92D001F0F9F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5337982A2F24E92D001F0F9F /* NotificationServiceExtension */,
+			);
+			name = NotificationServiceExtension;
+			packageProductDependencies = (
+			);
+			productName = NotificationServiceExtension;
+			productReference = 533798292F24E92D001F0F9F /* NotificationServiceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		539E88682F0C0FED00D852C8 /* BasaltiOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 539E888A2F0C0FEF00D852C8 /* Build configuration list for PBXNativeTarget "BasaltiOS" */;
@@ -121,10 +190,12 @@
 				539E88652F0C0FED00D852C8 /* Sources */,
 				539E88662F0C0FED00D852C8 /* Frameworks */,
 				539E88672F0C0FED00D852C8 /* Resources */,
+				533798352F24E92D001F0F9F /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5337982F2F24E92D001F0F9F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				539E886B2F0C0FED00D852C8 /* BasaltiOS */,
@@ -192,6 +263,9 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					533798282F24E92D001F0F9F = {
+						CreatedOnToolsVersion = 26.2;
+					};
 					539E88682F0C0FED00D852C8 = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -222,11 +296,19 @@
 				539E88682F0C0FED00D852C8 /* BasaltiOS */,
 				539E88752F0C0FEF00D852C8 /* BasaltiOSTests */,
 				539E887F2F0C0FEF00D852C8 /* BasaltiOSUITests */,
+				533798282F24E92D001F0F9F /* NotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		533798272F24E92D001F0F9F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		539E88672F0C0FED00D852C8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -252,6 +334,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		533798252F24E92D001F0F9F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		539E88652F0C0FED00D852C8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -276,6 +365,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		5337982F2F24E92D001F0F9F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 533798282F24E92D001F0F9F /* NotificationServiceExtension */;
+			targetProxy = 5337982E2F24E92D001F0F9F /* PBXContainerItemProxy */;
+		};
 		539E88782F0C0FEF00D852C8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 539E88682F0C0FED00D852C8 /* BasaltiOS */;
@@ -289,6 +383,62 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		533798322F24E92D001F0F9F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q583S99HPR;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationServiceExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltiOS.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		533798332F24E92D001F0F9F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Q583S99HPR;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationServiceExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltiOS.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		539E88882F0C0FEF00D852C8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -413,6 +563,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BasaltiOS/BasaltiOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q583S99HPR;
@@ -433,6 +585,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -448,6 +601,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BasaltiOS/BasaltiOS.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = Q583S99HPR;
@@ -468,6 +623,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = yevgen.glukhov.BasaltiOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -561,6 +717,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		533798312F24E92D001F0F9F /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				533798322F24E92D001F0F9F /* Debug */,
+				533798332F24E92D001F0F9F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		539E88642F0C0FED00D852C8 /* Build configuration list for PBXProject "BasaltiOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

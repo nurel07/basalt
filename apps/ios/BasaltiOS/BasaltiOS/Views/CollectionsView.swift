@@ -20,6 +20,8 @@ struct CollectionsView: View {
                     ProgressView("Loading collections...")
                         .controlSize(.large)
                         .tint(.basaltTextPrimary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.basaltBackgroundPrimary)
                 } else if let errorMessage = errorMessage {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
