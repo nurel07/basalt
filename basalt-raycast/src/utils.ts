@@ -1,10 +1,9 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { runAppleScript } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import { environment } from "@raycast/api";
 
-const execPromise = promisify(exec);
+
 
 export const API_TRIPLE_URL =
   "https://basalt-prod.up.railway.app/api/wallpapers/raycast-triple";
@@ -65,7 +64,7 @@ export async function setDesktopWallpaper(url: string) {
 
   // AppleScript to set wallpaper on all desktops
   const script = `tell application "System Events" to tell every desktop to set picture to "${filePath}"`;
-  await execPromise(`osascript -e '${script}'`);
+  await runAppleScript(script);
 }
 
 export async function downloadWallpaper(url: string, name: string) {
