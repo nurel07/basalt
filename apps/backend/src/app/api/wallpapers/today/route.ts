@@ -25,6 +25,7 @@ export async function GET(request: Request) {
                     lte: new Date(),
                 },
                 channel: "HUMAN",
+                type: "DESKTOP",
             },
             orderBy: [
                 { releaseDate: "desc" },
